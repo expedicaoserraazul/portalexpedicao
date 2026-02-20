@@ -95,7 +95,7 @@ else:
         logout()
 
     # =========================
-    # TELAS
+    # HOME
     # =========================
     if menu == "Home":
         st.title("🏠 Home")
@@ -144,5 +144,4 @@ else:
     elif menu == "Painel":
         st.title("📊 Painel")
         st.write("Área operacional do sistema")
-        st.success("Base pronta para workflows e tarefas")
-
+        st.success("Base pronta para workflows, tarefas e processos")
