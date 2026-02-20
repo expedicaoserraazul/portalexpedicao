@@ -1,36 +1,35 @@
 import streamlit as st
 import hashlib
+import json
+import os
 
 # =========================
 # CONFIG
 # =========================
 st.set_page_config(page_title="Portal Expedição", layout="centered")
+DB_FILE = "users_db.json"
 
 # =========================
-# BANCO SIMPLES DE USUÁRIOS (etapa 1)
-# depois migramos para banco real (PostgreSQL / Firebase)
+# BANCO
 # =========================
-USERS = {
-    "admin": {
-        "name": "Administrador",
-        "password": hashlib.sha256("123456".encode()).hexdigest(),
-        "role": "admin"
-    },
-    "expedicao": {
-        "name": "Usuário Expedição",
-        "password": hashlib.sha256("exp123".encode()).hexdigest(),
-        "role": "user"
-    }
-}
+def load_users():
+    if not os.path.exists(DB_FILE):
+        return {}
+    with open(DB_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+def save_users(data):
+    with open(DB_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=4, ensure_ascii=False)
 
 # =========================
-# FUNÇÕES
+# SEGURANÇA
 # =========================
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
-def login(username, password):
-    user = USERS.get(username)
+def login(username, password, users):
+    user = users.get(username)
     if not user:
         return False
     if user["password"] == hash_password(password):
@@ -49,7 +48,12 @@ if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
 # =========================
-# LOGIN SCREEN
+# LOAD USERS
+# =========================
+users_db = load_users()
+
+# =========================
+# LOGIN
 # =========================
 if not st.session_state.authenticated:
     st.title("🔐 Portal Expedição")
@@ -61,7 +65,7 @@ if not st.session_state.authenticated:
         submit = st.form_submit_button("Entrar")
 
         if submit:
-            user = login(username, password)
+            user = login(username, password, users_db)
             if user:
                 st.session_state.authenticated = True
                 st.session_state.user = user
@@ -72,37 +76,70 @@ if not st.session_state.authenticated:
                 st.error("Usuário ou senha inválidos")
 
 # =========================
-# SISTEMA (PÓS-LOGIN)
+# SISTEMA
 # =========================
 else:
     st.sidebar.title("📂 Menu")
-    st.sidebar.write(f"Usuário: **{st.session_state.user['name']}**")
-    st.sidebar.write(f"Perfil: **{st.session_state.user['role']}**")
+    st.sidebar.write(f"👤 {st.session_state.user['name']}")
+    st.sidebar.write(f"🏷️ {st.session_state.user['cargo']}")
+    st.sidebar.write(f"🏢 {st.session_state.user['setor']}")
 
     menu = st.sidebar.radio(
         "Navegação",
-        ["Home", "Painel", "Configurações"]
+        ["Home", "Cadastro de Usuários", "Painel"]
     )
 
     if st.sidebar.button("🚪 Sair"):
         logout()
 
-    # ===== TELAS =====
+    # =========================
+    # TELAS
+    # =========================
     if menu == "Home":
         st.title("🏠 Home")
-        st.write("Bem-vindo ao Portal de Expedição")
-        st.info("Sistema autenticado e operacional.")
+        st.success("Sistema autenticado")
+        st.info("Portal Expedição operacional")
 
-    elif menu == "Painel":
-        st.title("📊 Painel")
-        st.write("Área principal do sistema")
-        st.success("Pronto para receber módulos de negócio")
-
-    elif menu == "Configurações":
-        st.title("⚙️ Configurações")
+    # =========================
+    # CADASTRO DE USUÁRIOS
+    # =========================
+    elif menu == "Cadastro de Usuários":
 
         if st.session_state.user["role"] != "admin":
             st.error("Acesso restrito ao administrador")
         else:
-            st.success("Área administrativa")
-            st.write("Gestão de usuários, permissões e sistema")
+            st.title("👥 Cadastro de Usuários")
+
+            with st.form("user_form"):
+                nome = st.text_input("Nome")
+                cargo = st.text_input("Cargo")
+                setor = st.text_input("Setor")
+                user = st.text_input("Usuário (login)")
+                senha = st.text_input("Senha", type="password")
+                role = st.selectbox("Perfil", ["user", "admin"])
+
+                submit = st.form_submit_button("Cadastrar")
+
+                if submit:
+                    if user in users_db:
+                        st.error("Usuário já existe")
+                    else:
+                        users_db[user] = {
+                            "name": nome,
+                            "cargo": cargo,
+                            "setor": setor,
+                            "user": user,
+                            "password": hash_password(senha),
+                            "role": role
+                        }
+                        save_users(users_db)
+                        st.success("Usuário cadastrado com sucesso!")
+                        st.rerun()
+
+    # =========================
+    # PAINEL
+    # =========================
+    elif menu == "Painel":
+        st.title("📊 Painel")
+        st.write("Área operacional do sistema")
+        st.success("Base pronta para workflows e tarefas")
