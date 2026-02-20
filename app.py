@@ -7,7 +7,9 @@ import os
 # CONFIG
 # =========================
 st.set_page_config(page_title="Portal Expedição", layout="centered")
-DB_FILE = "users_db.json"
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_FILE = os.path.join(BASE_DIR, "users_db.json")
 
 # =========================
 # BANCO
@@ -143,3 +145,4 @@ else:
         st.title("📊 Painel")
         st.write("Área operacional do sistema")
         st.success("Base pronta para workflows e tarefas")
+
