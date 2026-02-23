@@ -1,17 +1,12 @@
 {
-  "admin": [
-    "home",
-    "admin",
-    "fornecedores",
-    "modulos",
-    "configuracoes"
-  ],
-  "ti": [
-    "home",
-    "fornecedores",
-    "modulos"
-  ],
-  "usuario": [
-    "home"
-  ]
+  "admin": {
+    "fornecedores": ["read", "write", "delete"],
+    "usuarios": ["read", "write", "delete"],
+    "modulos": ["read", "write"],
+    "configuracoes": ["read", "write"]
+  },
+  "usuario": {
+    "fornecedores": ["read"],
+    "modulos": ["read"]
+  }
 }
