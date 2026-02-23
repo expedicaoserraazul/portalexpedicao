@@ -1,68 +1,46 @@
 import streamlit as st
-import json
-import hashlib
-import os
+from auth.login import login_screen
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_FILE = os.path.join(BASE_DIR, "users_db.json")
-
-# -------------------------
-# Utils
-# -------------------------
-
-def load_users():
-    if not os.path.exists(DB_FILE):
-        return {}
-    with open(DB_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-def hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode()).hexdigest()
-
-def authenticate(username, password):
-    users = load_users()
-    if username not in users:
-        return False, None
-
-    user = users[username]
-    input_hash = hash_password(password)
-
-    if input_hash == user["password"]:
-        return True, user
-    return False, None
-
-# -------------------------
-# Session
-# -------------------------
+st.set_page_config(page_title="Portal Expedição", layout="centered")
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
-if "user_data" not in st.session_state:
-    st.session_state.user_data = None
-
-# -------------------------
-# UI
-# -------------------------
-
-st.set_page_config(page_title="Portal Expedição", layout="centered")
-
 if not st.session_state.authenticated:
-    st.title("🔐 Portal Expedição")
-    st.subheader("Acesso ao sistema")
-
-    username = st.text_input("Usuário")
-    password = st.text_input("Senha", type="password")
-
-    if st.button("Entrar"):
-        ok, user_data = authenticate(username, password)
-
-        if ok:
-            st.session_state.authenticated = True
-            st.session_state.user_data = user_data
-            st.rerun()
-        else:
-            st.error("Usuário ou senha inválidos")
+    login_screen()
 else:
-    import home
-    home.render(st.session_state.user_data)
+    st.sidebar.title("📂 Menu")
+    st.sidebar.write(f"👤 {st.session_state.user['name']}")
+    st.sidebar.write(f"🏷️ {st.session_state.user['cargo']}")
+    st.sidebar.write(f"🏢 {st.session_state.user['setor']}")
+    st.sidebar.write(f"🔐 Perfil: {st.session_state.user['role']}")
+
+    menu = st.sidebar.radio("Navegação", [
+        "Home",
+        "Administração",
+        "Fornecedores",
+        "Módulos",
+        "Configurações"
+    ])
+
+    if st.sidebar.button("🚪 Sair"):
+        for k in list(st.session_state.keys()):
+            del st.session_state[k]
+        st.rerun()
+
+    if menu == "Home":
+        st.title("🏠 Home")
+        st.success("Sistema autenticado")
+
+    elif menu == "Administração":
+        st.title("🛠 Painel Administrativo")
+        st.write("Gestão do sistema")
+
+    elif menu == "Fornecedores":
+        st.title("🏢 Cadastro de Fornecedores")
+
+    elif menu == "Módulos":
+        st.title("🧩 Módulos do Sistema")
+
+    elif menu == "Configurações":
+        st.title("⚙️ Configurações do Sistema")
