@@ -2,38 +2,40 @@ import streamlit as st
 from database.manager import load
 
 # =========================
-# TABELAS
+# RBAC REAL + DAL
 # =========================
-PERMISSOES_TABLE = "permissoes"
-MODULOS_TABLE = "modulos"
 
-# =========================
-# LOADERS
-# =========================
+def get_user():
+    if "user" not in st.session_state:
+        return None
+    return st.session_state.user
+
+def get_role():
+    user = get_user()
+    if not user:
+        return None
+    return user.get("role")
+
+# ---------- LOADERS ----------
 
 def load_permissoes():
-    return load(PERMISSOES_TABLE)
+    return load("permissoes")
 
 def load_modulos():
-    return load(MODULOS_TABLE)
+    return load("modulos")
 
-# =========================
-# RBAC CORE
-# =========================
+# ---------- AUTORIZAÇÃO ----------
 
 def tem_permissao(modulo: str, acao: str) -> bool:
     """
-    Verifica permissão no modelo RBAC:
-    role -> modulo -> ação
+    Verifica permissão real por ação (RBAC)
+    Ex: tem_permissao("fornecedores", "write")
     """
-    if "user" not in st.session_state:
+    role = get_role()
+    if not role:
         return False
 
-    role = st.session_state.user.get("role")
     permissoes = load_permissoes()
-
-    if not permissoes:
-        return False
 
     if role not in permissoes:
         return False
@@ -43,36 +45,20 @@ def tem_permissao(modulo: str, acao: str) -> bool:
 
     return acao in permissoes[role][modulo]
 
-# =========================
-# PROTEÇÃO DE TELAS
-# =========================
-
-def proteger_tela(modulo: str, acao: str = "view"):
-    """
-    Bloqueia automaticamente a tela se não houver permissão
-    """
-    if not tem_permissao(modulo, acao):
-        st.error("⛔ Acesso negado — Permissão insuficiente")
-        st.stop()
-
-# =========================
-# FILTRO DE MÓDULOS (MENU)
-# =========================
+# ---------- FILTRO DE MÓDULOS (MENU) ----------
 
 def modulos_permitidos():
     """
-    Retorna os módulos permitidos para o usuário logado
+    Retorna módulos permitidos para o menu lateral
     """
-    if "user" not in st.session_state:
+    role = get_role()
+    if not role:
         return []
 
-    role = st.session_state.user.get("role")
     permissoes = load_permissoes()
-
-    if not permissoes:
-        return []
 
     if role not in permissoes:
         return []
 
+    # permissoes[role] agora é dict {modulo: [acoes]}
     return list(permissoes[role].keys())
