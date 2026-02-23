@@ -1,6 +1,7 @@
 import streamlit as st
 from auth.login import login_screen
 from cadastros.fornecedores import tela_fornecedores
+from admin.painel import painel_admin
 
 st.set_page_config(page_title="Portal Expedição", layout="centered")
 
@@ -33,7 +34,6 @@ else:
         st.title("🏠 Home")
         st.success("Sistema autenticado")
 
-    from admin.painel import painel_admin
     elif menu == "Administração":
         painel_admin()
 
@@ -45,6 +45,7 @@ else:
 
     elif menu == "Configurações":
         st.title("⚙️ Configurações do Sistema")
+
 
 
 
