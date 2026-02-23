@@ -1,4 +1,7 @@
 {
   "admin": ["ALL"],
-  "user": ["HOME", "FORNECEDORES"]
+  "user": ["HOME", "FORNECEDORES"],
+  "gestor": ["HOME", "FORNECEDORES", "ADMINISTRACAO"],
+  "comprador": ["HOME", "FORNECEDORES"],
+  "operacional": ["HOME"]
 }
