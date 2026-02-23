@@ -1,17 +1,39 @@
-from database.manager import load
+import json
+import os
 
-def get_permissions(role):
-    permissoes = load("permissoes")
-    return permissoes.get(role, [])
+PERMISSOES_FILE = "database/permissoes.json"
+MODULOS_FILE = "database/modulos.json"
 
-def has_permission(user, module):
-    if not user:
+# ---------- LOADERS ----------
+
+def load_permissoes():
+    if not os.path.exists(PERMISSOES_FILE):
+        return {}
+    with open(PERMISSOES_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+def load_modulos():
+    if not os.path.exists(MODULOS_FILE):
+        return {}
+    with open(MODULOS_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+# ---------- AUTORIZAÇÃO ----------
+
+def tem_permissao(role: str, modulo: str) -> bool:
+    permissoes = load_permissoes()
+
+    if role not in permissoes:
         return False
 
-    role = user.get("role")
-    perms = get_permissions(role)
+    return modulo in permissoes[role]
 
-    if "ALL" in perms:
-        return True
+def filtrar_modulos_por_role(role: str):
+    modulos = load_modulos()
+    permissoes = load_permissoes()
 
-    return module in perms
+    if role not in permissoes:
+        return []
+
+    permitidos = permissoes[role]
+    return [m for m in modulos if m in permitidos]
