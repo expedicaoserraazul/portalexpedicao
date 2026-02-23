@@ -1,5 +1,5 @@
 import streamlit as st
-from admin.usuarios import tela_usuarios
+from auth.login import cadastro_usuario
 from admin.permissoes import tela_permissoes
 from admin.modulos import tela_modulos
 from admin.configuracoes import tela_configuracoes
@@ -14,14 +14,27 @@ def painel_admin():
         "⚙️ Configurações"
     ])
 
+    # =========================
+    # ABA USUÁRIOS
+    # =========================
     with abas[0]:
-        tela_usuarios()
+        st.subheader("👥 Gestão de Usuários")
+        cadastro_usuario()   # <-- AQUI É O VÍNCULO REAL
 
+    # =========================
+    # ABA PERMISSÕES
+    # =========================
     with abas[1]:
         tela_permissoes()
 
+    # =========================
+    # ABA MÓDULOS
+    # =========================
     with abas[2]:
         tela_modulos()
 
+    # =========================
+    # ABA CONFIGURAÇÕES
+    # =========================
     with abas[3]:
         tela_configuracoes()
