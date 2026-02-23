@@ -1,5 +1,5 @@
-import json
-import os
+import streamlit as st
+from database.manager import load_json
 
 PERMISSOES_FILE = "database/permissoes.json"
 MODULOS_FILE = "database/modulos.json"
@@ -7,33 +7,52 @@ MODULOS_FILE = "database/modulos.json"
 # ---------- LOADERS ----------
 
 def load_permissoes():
-    if not os.path.exists(PERMISSOES_FILE):
-        return {}
-    with open(PERMISSOES_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
+    return load_json(PERMISSOES_FILE)
 
 def load_modulos():
-    if not os.path.exists(MODULOS_FILE):
-        return {}
-    with open(MODULOS_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
+    return load_json(MODULOS_FILE)
 
-# ---------- AUTORIZAÇÃO ----------
+# ---------- RBAC CORE ----------
 
-def tem_permissao(role: str, modulo: str) -> bool:
+def tem_permissao(modulo: str, acao: str) -> bool:
+    """
+    Verifica permissão por:
+    role -> modulo -> ação
+    """
+    if "user" not in st.session_state:
+        return False
+
+    role = st.session_state.user.get("role")
     permissoes = load_permissoes()
 
     if role not in permissoes:
         return False
 
-    return modulo in permissoes[role]
+    if modulo not in permissoes[role]:
+        return False
 
-def filtrar_modulos_por_role(role: str):
-    modulos = load_modulos()
+    return acao in permissoes[role][modulo]
+
+# ---------- PROTEÇÃO DE TELA ----------
+
+def proteger_tela(modulo: str, acao: str = "view"):
+    if not tem_permissao(modulo, acao):
+        st.error("⛔ Acesso negado — Permissão insuficiente")
+        st.stop()
+
+# ---------- FILTRO DE MENU ----------
+
+def modulos_permitidos():
+    """
+    Retorna apenas módulos permitidos para o usuário logado
+    """
+    if "user" not in st.session_state:
+        return []
+
+    role = st.session_state.user.get("role")
     permissoes = load_permissoes()
 
     if role not in permissoes:
         return []
 
-    permitidos = permissoes[role]
-    return [m for m in modulos if m in permitidos]
+    return list(permissoes[role].keys())
