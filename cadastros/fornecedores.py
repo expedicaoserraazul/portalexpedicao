@@ -34,8 +34,8 @@ def tela_fornecedores():
         cnpj = st.text_input("CNPJ")
         endereco = st.text_input("Endereço")
         divisao = st.text_input("Divisão (ex: Padaria)")
-        cond_pag = st.text_input("Condição de Pagamento (ex: 30 dias)")
-        comprador = st.text_input("Comprador (ex: Fernando)")
+        cond_pag = st.text_input("Condição de Pagamento")
+        comprador = st.text_input("Comprador")
         tolerancia = st.number_input("Tolerância de Prazo de Pagamento (dias)", min_value=0, step=1)
 
         submit = st.form_submit_button("Cadastrar fornecedor")
