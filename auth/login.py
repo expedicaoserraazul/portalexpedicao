@@ -27,6 +27,45 @@ def authenticate(username, password):
 # LOGIN SCREEN
 # =========================
 def login_screen():
+    users = load("users")
+
+    # =========================
+    # BOOTSTRAP (primeiro admin)
+    # =========================
+    if len(users) == 0:
+        st.title("🚀 Inicialização do Sistema")
+        st.subheader("Criar administrador raiz")
+
+        with st.form("bootstrap_admin"):
+            nome = st.text_input("Nome")
+            cargo = st.text_input("Cargo")
+            setor = st.text_input("Setor")
+            user = st.text_input("Usuário (login)")
+            senha = st.text_input("Senha", type="password")
+
+            submit = st.form_submit_button("Criar Administrador")
+
+            if submit:
+                novo_admin = {
+                    "name": nome,
+                    "cargo": cargo,
+                    "setor": setor,
+                    "password": hash_password(senha),
+                    "role": "admin",
+                    "permissoes": ["ALL"]
+                }
+
+                insert("users", user, novo_admin)
+
+                st.success("Administrador criado com sucesso!")
+                st.info("Agora faça login com as credenciais criadas.")
+                st.rerun()
+
+        return
+
+    # =========================
+    # LOGIN NORMAL
+    # =========================
     st.title("🔐 Portal Expedição")
     st.subheader("Acesso ao sistema")
 
