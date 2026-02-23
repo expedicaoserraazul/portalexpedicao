@@ -38,11 +38,12 @@ else:
         st.write("Gestão do sistema")
 
     elif menu == "Fornecedores":
-    tela_fornecedores()
+        tela_fornecedores()
 
     elif menu == "Módulos":
         st.title("🧩 Módulos do Sistema")
 
     elif menu == "Configurações":
         st.title("⚙️ Configurações do Sistema")
+
 
