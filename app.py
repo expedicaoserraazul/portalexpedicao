@@ -2,50 +2,70 @@ import streamlit as st
 from auth.login import login_screen
 from cadastros.fornecedores import tela_fornecedores
 from admin.painel import painel_admin
+from security.authorization import filtrar_modulos_por_role
 
 st.set_page_config(page_title="Portal Expedição", layout="centered")
 
+# ---------- SESSION INIT ----------
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
+# ---------- LOGIN ----------
 if not st.session_state.authenticated:
     login_screen()
+
+# ---------- SISTEMA ----------
 else:
     st.sidebar.title("📂 Menu")
+
     st.sidebar.write(f"👤 {st.session_state.user['name']}")
     st.sidebar.write(f"🏷️ {st.session_state.user['cargo']}")
     st.sidebar.write(f"🏢 {st.session_state.user['setor']}")
     st.sidebar.write(f"🔐 Perfil: {st.session_state.user['role']}")
 
-    menu = st.sidebar.radio("Navegação", [
-        "Home",
-        "Administração",
-        "Fornecedores",
-        "Módulos",
-        "Configurações"
-    ])
+    role = st.session_state.user["role"]
 
+    # ---------- RBAC ----------
+    modulos_permitidos = filtrar_modulos_por_role(role)
+
+    menu_labels = {
+        "home": "Home",
+        "admin": "Administração",
+        "fornecedores": "Fornecedores",
+        "modulos": "Módulos",
+        "configuracoes": "Configurações"
+    }
+
+    menu = st.sidebar.radio(
+        "Navegação",
+        [menu_labels[m] for m in modulos_permitidos]
+    )
+
+    # ---------- LOGOUT ----------
     if st.sidebar.button("🚪 Sair"):
         for k in list(st.session_state.keys()):
             del st.session_state[k]
         st.rerun()
 
-    if menu == "Home":
+    # ---------- MENU ROUTER ----------
+    label_to_key = {v: k for k, v in menu_labels.items()}
+    menu_key = label_to_key[menu]
+
+    # ---------- TELAS ----------
+    if menu_key == "home":
         st.title("🏠 Home")
         st.success("Sistema autenticado")
 
-    elif menu == "Administração":
+    elif menu_key == "admin":
         painel_admin()
 
-    elif menu == "Fornecedores":
+    elif menu_key == "fornecedores":
         tela_fornecedores()
 
-    elif menu == "Módulos":
+    elif menu_key == "modulos":
         st.title("🧩 Módulos do Sistema")
+        st.info("Gestão de módulos do sistema")
 
-    elif menu == "Configurações":
+    elif menu_key == "configuracoes":
         st.title("⚙️ Configurações do Sistema")
-
-
-
-
+        st.info("Configurações gerais da plataforma")
