@@ -1,3 +1,34 @@
+import streamlit as st
+import json
+import os
+
+# =========================
+# CONFIG
+# =========================
+DB_PATH = "database"
+DB_FILE = os.path.join(DB_PATH, "fornecedores.json")
+
+# =========================
+# BANCO
+# =========================
+def carregar_fornecedores():
+    if not os.path.exists(DB_PATH):
+        os.makedirs(DB_PATH)
+
+    if not os.path.exists(DB_FILE):
+        with open(DB_FILE, "w", encoding="utf-8") as f:
+            json.dump({}, f)
+
+    with open(DB_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+def salvar_fornecedores(data):
+    with open(DB_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=4, ensure_ascii=False)
+
+# =========================
+# TELA
+# =========================
 def tela_fornecedores():
     st.subheader("📋 Cadastro de Fornecedores")
 
