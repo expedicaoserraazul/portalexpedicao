@@ -1,3 +1,7 @@
 {
-  "ativos": ["fornecedores", "usuarios", "admin"]
+  "home": "Home",
+  "admin": "Administração",
+  "fornecedores": "Fornecedores",
+  "modulos": "Módulos",
+  "configuracoes": "Configurações"
 }
