@@ -26,8 +26,8 @@ else:
     role = st.session_state.user["role"]
 
     # ---------- RBAC ----------
-    modulos_permitidos = filtrar_modulos_por_role(role)
-
+    modulos = modulos_permitidos()
+    
     menu_labels = {
         "home": "Home",
         "admin": "Administração",
@@ -69,4 +69,5 @@ else:
     elif menu_key == "configuracoes":
         st.title("⚙️ Configurações do Sistema")
         st.info("Configurações gerais da plataforma")
+
 
