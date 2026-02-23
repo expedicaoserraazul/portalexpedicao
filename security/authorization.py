@@ -1,22 +1,29 @@
 import streamlit as st
-from database.manager import load_json
+from database.manager import load
 
-PERMISSOES_FILE = "database/permissoes.json"
-MODULOS_FILE = "database/modulos.json"
+# =========================
+# TABELAS
+# =========================
+PERMISSOES_TABLE = "permissoes"
+MODULOS_TABLE = "modulos"
 
-# ---------- LOADERS ----------
+# =========================
+# LOADERS
+# =========================
 
 def load_permissoes():
-    return load_json(PERMISSOES_FILE)
+    return load(PERMISSOES_TABLE)
 
 def load_modulos():
-    return load_json(MODULOS_FILE)
+    return load(MODULOS_TABLE)
 
-# ---------- RBAC CORE ----------
+# =========================
+# RBAC CORE
+# =========================
 
 def tem_permissao(modulo: str, acao: str) -> bool:
     """
-    Verifica permissão por:
+    Verifica permissão no modelo RBAC:
     role -> modulo -> ação
     """
     if "user" not in st.session_state:
@@ -24,6 +31,9 @@ def tem_permissao(modulo: str, acao: str) -> bool:
 
     role = st.session_state.user.get("role")
     permissoes = load_permissoes()
+
+    if not permissoes:
+        return False
 
     if role not in permissoes:
         return False
@@ -33,24 +43,34 @@ def tem_permissao(modulo: str, acao: str) -> bool:
 
     return acao in permissoes[role][modulo]
 
-# ---------- PROTEÇÃO DE TELA ----------
+# =========================
+# PROTEÇÃO DE TELAS
+# =========================
 
 def proteger_tela(modulo: str, acao: str = "view"):
+    """
+    Bloqueia automaticamente a tela se não houver permissão
+    """
     if not tem_permissao(modulo, acao):
         st.error("⛔ Acesso negado — Permissão insuficiente")
         st.stop()
 
-# ---------- FILTRO DE MENU ----------
+# =========================
+# FILTRO DE MÓDULOS (MENU)
+# =========================
 
 def modulos_permitidos():
     """
-    Retorna apenas módulos permitidos para o usuário logado
+    Retorna os módulos permitidos para o usuário logado
     """
     if "user" not in st.session_state:
         return []
 
     role = st.session_state.user.get("role")
     permissoes = load_permissoes()
+
+    if not permissoes:
+        return []
 
     if role not in permissoes:
         return []
