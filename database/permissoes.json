@@ -1,7 +1,17 @@
 {
-  "admin": ["ALL"],
-  "user": ["HOME", "FORNECEDORES"],
-  "gestor": ["HOME", "FORNECEDORES", "ADMINISTRACAO"],
-  "comprador": ["HOME", "FORNECEDORES"],
-  "operacional": ["HOME"]
+  "admin": [
+    "home",
+    "admin",
+    "fornecedores",
+    "modulos",
+    "configuracoes"
+  ],
+  "ti": [
+    "home",
+    "fornecedores",
+    "modulos"
+  ],
+  "usuario": [
+    "home"
+  ]
 }
