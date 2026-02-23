@@ -1,1 +1,15 @@
-{}
+{
+  "12345678000100": {
+    "nome": "Fornecedor Exemplo",
+    "email": "contato@fornecedor.com",
+    "telefone": "21999999999",
+    "endereco": {
+      "cep": "28600000",
+      "logradouro": "Rua Central",
+      "bairro": "Centro",
+      "numero": "100",
+      "cidade": "Nova Friburgo",
+      "estado": "RJ"
+    }
+  }
+}
