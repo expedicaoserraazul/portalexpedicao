@@ -1,5 +1,6 @@
 import streamlit as st
 from auth.login import login_screen
+from cadastros.fornecedores import tela_fornecedores
 
 st.set_page_config(page_title="Portal Expedição", layout="centered")
 
@@ -37,10 +38,11 @@ else:
         st.write("Gestão do sistema")
 
     elif menu == "Fornecedores":
-        st.title("🏢 Cadastro de Fornecedores")
+    tela_fornecedores()
 
     elif menu == "Módulos":
         st.title("🧩 Módulos do Sistema")
 
     elif menu == "Configurações":
         st.title("⚙️ Configurações do Sistema")
+
