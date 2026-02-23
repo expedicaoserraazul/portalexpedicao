@@ -2,7 +2,7 @@ import streamlit as st
 from auth.login import login_screen
 from cadastros.fornecedores import tela_fornecedores
 from admin.painel import painel_admin
-from security.authorization import filtrar_modulos_por_role
+from security.authorization import modulos_permitidos
 
 st.set_page_config(page_title="Portal Expedição", layout="centered")
 
@@ -69,3 +69,4 @@ else:
     elif menu_key == "configuracoes":
         st.title("⚙️ Configurações do Sistema")
         st.info("Configurações gerais da plataforma")
+
