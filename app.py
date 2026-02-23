@@ -33,9 +33,9 @@ else:
         st.title("🏠 Home")
         st.success("Sistema autenticado")
 
+    from admin.painel import painel_admin
     elif menu == "Administração":
-        st.title("🛠 Painel Administrativo")
-        st.write("Gestão do sistema")
+        painel_admin()
 
     elif menu == "Fornecedores":
         tela_fornecedores()
@@ -45,5 +45,6 @@ else:
 
     elif menu == "Configurações":
         st.title("⚙️ Configurações do Sistema")
+
 
 
