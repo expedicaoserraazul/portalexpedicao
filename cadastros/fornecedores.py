@@ -1,80 +1,68 @@
-import streamlit as st
-import json
-import os
-import uuid
-
-DB_FILE = "database/fornecedores.json"
-
-# =========================
-# BANCO
-# =========================
-def load_fornecedores():
-    if not os.path.exists(DB_FILE):
-        return {}
-    with open(DB_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-def save_fornecedores(data):
-    with open(DB_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4, ensure_ascii=False)
-
-# =========================
-# TELA
-# =========================
 def tela_fornecedores():
+    st.subheader("📋 Cadastro de Fornecedores")
 
-    st.title("🏭 Cadastro de Fornecedores")
-
-    fornecedores = load_fornecedores()
-
-    st.subheader("➕ Novo fornecedor")
+    fornecedores = carregar_fornecedores()
 
     with st.form("form_fornecedor"):
-        razao = st.text_input("Razão Social")
+        st.markdown("### 🏢 Dados do Fornecedor")
+        nome = st.text_input("Nome do fornecedor")
         cnpj = st.text_input("CNPJ")
-        endereco = st.text_input("Endereço")
-        divisao = st.text_input("Divisão (ex: Padaria)")
-        cond_pag = st.text_input("Condição de Pagamento")
-        comprador = st.text_input("Comprador")
-        tolerancia = st.number_input("Tolerância de Prazo de Pagamento (dias)", min_value=0, step=1)
+        email = st.text_input("E-mail")
+        telefone = st.text_input("Telefone")
 
-        submit = st.form_submit_button("Cadastrar fornecedor")
+        st.markdown("### 📍 Endereço")
+        cep = st.text_input("CEP")
+        logradouro = st.text_input("Logradouro")
+        bairro = st.text_input("Bairro")
+        numero = st.text_input("Número")
+        cidade = st.text_input("Cidade")
+        estado = st.text_input("Estado")
 
-        if submit:
-            if not razao or not cnpj:
-                st.error("Razão Social e CNPJ são obrigatórios")
-            else:
-                fornecedor_id = str(uuid.uuid4())
+        submit = st.form_submit_button("💾 Cadastrar fornecedor")
 
-                fornecedores[fornecedor_id] = {
-                    "razao_social": razao,
-                    "cnpj": cnpj,
-                    "endereco": endereco,
-                    "divisao": divisao,
-                    "condicao_pagamento": cond_pag,
-                    "comprador": comprador,
-                    "tolerancia_pagamento": tolerancia
-                }
+    if submit:
+        if not nome or not cnpj:
+            st.error("Nome e CNPJ são obrigatórios.")
+            return
 
-                save_fornecedores(fornecedores)
-                st.success("Fornecedor cadastrado com sucesso!")
-                st.rerun()
+        if cnpj in fornecedores:
+            st.error("Fornecedor já cadastrado com esse CNPJ.")
+            return
+
+        fornecedores[cnpj] = {
+            "nome": nome,
+            "email": email,
+            "telefone": telefone,
+            "endereco": {
+                "cep": cep,
+                "logradouro": logradouro,
+                "bairro": bairro,
+                "numero": numero,
+                "cidade": cidade,
+                "estado": estado
+            }
+        }
+
+        salvar_fornecedores(fornecedores)
+        st.success("Fornecedor cadastrado com sucesso!")
+        st.rerun()
 
     st.divider()
-
-    # =========================
-    # LISTAGEM
-    # =========================
-    st.subheader("📋 Fornecedores cadastrados")
+    st.subheader("📦 Fornecedores cadastrados")
 
     if not fornecedores:
         st.info("Nenhum fornecedor cadastrado.")
     else:
-        for fid, f in fornecedores.items():
-            with st.expander(f["razao_social"]):
-                st.write(f"**CNPJ:** {f['cnpj']}")
-                st.write(f"**Endereço:** {f['endereco']}")
-                st.write(f"**Divisão:** {f['divisao']}")
-                st.write(f"**Condição de pagamento:** {f['condicao_pagamento']}")
-                st.write(f"**Comprador:** {f['comprador']}")
-                st.write(f"**Tolerância:** {f['tolerancia_pagamento']} dias")
+        for cnpj, dados in fornecedores.items():
+            with st.expander(f"🏢 {dados['nome']} — {cnpj}"):
+                st.write(f"📧 Email: {dados.get('email','')}")
+                st.write(f"📞 Telefone: {dados.get('telefone','')}")
+
+                endereco = dados.get("endereco", {})
+                st.markdown("**📍 Endereço:**")
+                st.write(f"CEP: {endereco.get('cep','')}")
+                st.write(f"Logradouro: {endereco.get('logradouro','')}")
+                st.write(f"Bairro: {endereco.get('bairro','')}")
+                st.write(f"Número: {endereco.get('numero','')}")
+                st.write(f"Cidade: {endereco.get('cidade','')}")
+                st.write(f"Estado: {endereco.get('estado','')}")
