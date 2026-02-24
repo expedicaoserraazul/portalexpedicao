@@ -26,8 +26,8 @@ else:
     role = st.session_state.user["role"]
 
     # ---------- RBAC ----------
-    modulos = modulos_permitidos()
-    
+    modulos = modulos_permitidos(role)   # ✅ passa role e recebe lista
+
     menu_labels = {
         "home": "Home",
         "admin": "Administração",
@@ -38,7 +38,7 @@ else:
 
     menu = st.sidebar.radio(
         "Navegação",
-        [menu_labels[m] for m in modulos_permitidos]
+        [menu_labels[m] for m in modulos]   # ✅ usa a lista, não a função
     )
 
     # ---------- LOGOUT ----------
@@ -69,5 +69,3 @@ else:
     elif menu_key == "configuracoes":
         st.title("⚙️ Configurações do Sistema")
         st.info("Configurações gerais da plataforma")
-
-
