@@ -1,13 +1,13 @@
 {
-    "admin": [
-        "home",
-        "admin",
-        "fornecedores",
-        "modulos",
-        "configuracoes"
-    ],
-    "user": [
-        "home",
-        "fornecedores"
-    ]
+    "admin": {
+        "home": ["acessar"],
+        "admin": ["acessar"],
+        "fornecedores": ["listar", "criar", "editar", "excluir"],
+        "modulos": ["listar", "criar", "editar", "excluir"],
+        "configuracoes": ["listar", "editar"]
+    },
+    "user": {
+        "home": ["acessar"],
+        "fornecedores": ["listar"]
+    }
 }
