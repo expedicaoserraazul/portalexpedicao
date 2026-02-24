@@ -21,27 +21,35 @@ def load_modulos():
     with open(MODULOS_FILE, "r", encoding="utf-8") as f:
         return json.load(f)
 
-# ---------- RBAC CORE ----------
+# ---------- ACL CORE ----------
 
 def modulos_permitidos(role: str):
-    """
-    Retorna lista de módulos permitidos para o role
-    """
     permissoes = load_permissoes()
     modulos = load_modulos()
 
     if role not in permissoes:
         return []
 
-    permitidos = permissoes[role]
+    return [m for m in permissoes[role].keys() if m in modulos]
 
-    # garante que só retorna módulos existentes
-    return [m for m in permitidos if m in modulos]
+def acoes_permitidas(role: str, modulo: str):
+    permissoes = load_permissoes()
 
-def tem_permissao(role: str, modulo: str) -> bool:
+    if role not in permissoes:
+        return []
+
+    if modulo not in permissoes[role]:
+        return []
+
+    return permissoes[role][modulo]
+
+def pode(role: str, modulo: str, acao: str) -> bool:
     permissoes = load_permissoes()
 
     if role not in permissoes:
         return False
 
-    return modulo in permissoes[role]
+    if modulo not in permissoes[role]:
+        return False
+
+    return acao in permissoes[role][modulo]
