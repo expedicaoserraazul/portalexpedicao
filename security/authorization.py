@@ -1,64 +1,47 @@
-import streamlit as st
-from database.manager import load
+import json
+import os
 
-# =========================
-# RBAC REAL + DAL
-# =========================
+BASE_PATH = os.path.dirname(__file__)
+DB_PATH = os.path.join(os.path.dirname(BASE_PATH), "database")
 
-def get_user():
-    if "user" not in st.session_state:
-        return None
-    return st.session_state.user
-
-def get_role():
-    user = get_user()
-    if not user:
-        return None
-    return user.get("role")
+PERMISSOES_FILE = os.path.join(DB_PATH, "permissoes.json")
+MODULOS_FILE = os.path.join(DB_PATH, "modulos.json")
 
 # ---------- LOADERS ----------
 
 def load_permissoes():
-    return load("permissoes")
+    if not os.path.exists(PERMISSOES_FILE):
+        return {}
+    with open(PERMISSOES_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 def load_modulos():
-    return load("modulos")
+    if not os.path.exists(MODULOS_FILE):
+        return {}
+    with open(MODULOS_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
 
-# ---------- AUTORIZAÇÃO ----------
+# ---------- RBAC CORE ----------
 
-def tem_permissao(modulo: str, acao: str) -> bool:
+def modulos_permitidos(role: str):
     """
-    Verifica permissão real por ação (RBAC)
-    Ex: tem_permissao("fornecedores", "write")
+    Retorna lista de módulos permitidos para o role
     """
-    role = get_role()
-    if not role:
-        return False
+    permissoes = load_permissoes()
+    modulos = load_modulos()
 
+    if role not in permissoes:
+        return []
+
+    permitidos = permissoes[role]
+
+    # garante que só retorna módulos existentes
+    return [m for m in permitidos if m in modulos]
+
+def tem_permissao(role: str, modulo: str) -> bool:
     permissoes = load_permissoes()
 
     if role not in permissoes:
         return False
 
-    if modulo not in permissoes[role]:
-        return False
-
-    return acao in permissoes[role][modulo]
-
-# ---------- FILTRO DE MÓDULOS (MENU) ----------
-
-def modulos_permitidos():
-    """
-    Retorna módulos permitidos para o menu lateral
-    """
-    role = get_role()
-    if not role:
-        return []
-
-    permissoes = load_permissoes()
-
-    if role not in permissoes:
-        return []
-
-    # permissoes[role] agora é dict {modulo: [acoes]}
-    return list(permissoes[role].keys())
+    return modulo in permissoes[role]
