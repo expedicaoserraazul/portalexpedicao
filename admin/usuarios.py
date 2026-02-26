@@ -1,61 +1,98 @@
 import streamlit as st
-import json
-import os
+from database.manager import load, insert
 import hashlib
 
-DB_FILE = "database/users.json"
+# ---------- CONSTANTES ----------
+LOJAS = [
+    "São Geraldo",
+    "Conselheiro",
+    "Olaria",
+    "Mury",
+    "Teresópolis",
+    "Cordeiro",
+    "Centro NF",
+    "Bom Jardim",
+    "Todas"
+]
 
-def load_users():
-    if not os.path.exists(DB_FILE):
-        return {}
-    with open(DB_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-def save_users(data):
-    with open(DB_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4, ensure_ascii=False)
-
+# ---------- SEGURANÇA ----------
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
+# ---------- TELA ----------
 def tela_usuarios():
     st.subheader("👥 Gestão de Usuários")
 
-    users = load_users()
+    users = load("users")
 
-    st.markdown("### 📋 Usuários cadastrados")
+    abas = st.tabs(["➕ Cadastrar Usuário", "📋 Usuários Cadastrados"])
 
-    for username, data in users.items():
-        with st.expander(f"👤 {data['name']} ({username})"):
-            st.write(f"Cargo: {data['cargo']}")
-            st.write(f"Setor: {data['setor']}")
-            st.write(f"Perfil: {data['role']}")
+    # ===============================
+    # ABA 1 — CADASTRO
+    # ===============================
+    with abas[0]:
+        st.markdown("### Cadastro de novo usuário")
 
-    st.divider()
-    st.markdown("### ➕ Criar novo usuário")
+        with st.form("form_cadastro_usuario"):
+            nome = st.text_input("Nome")
+            cargo = st.text_input("Cargo")
+            setor = st.text_input("Setor")
+            usuario = st.text_input("Usuário (login)")
+            senha = st.text_input("Senha", type="password")
 
-    with st.form("novo_usuario_admin"):
-        nome = st.text_input("Nome")
-        cargo = st.text_input("Cargo")
-        setor = st.text_input("Setor")
-        user = st.text_input("Usuário")
-        senha = st.text_input("Senha", type="password")
-        role = st.selectbox("Perfil", ["user", "admin"])
+            role = st.selectbox("Perfil", ["user", "admin"])
 
-        submit = st.form_submit_button("Cadastrar")
+            lojas = st.multiselect(
+                "Lojas permitidas",
+                LOJAS,
+                default=[]
+            )
 
-        if submit:
-            if user in users:
-                st.error("Usuário já existe")
-            else:
-                users[user] = {
+            submit = st.form_submit_button("Cadastrar usuário")
+
+            if submit:
+                if not all([nome, cargo, setor, usuario, senha]):
+                    st.error("Preencha todos os campos obrigatórios")
+                    return
+
+                if not lojas:
+                    st.error("Selecione pelo menos uma loja")
+                    return
+
+                if usuario in users:
+                    st.error("Usuário já existe")
+                    return
+
+                # Regra: se marcar "Todas", ignora as outras
+                if "Todas" in lojas:
+                    lojas = ["Todas"]
+
+                novo_user = {
                     "name": nome,
                     "cargo": cargo,
                     "setor": setor,
-                    "user": user,
-                    "password": hash_password(senha),
-                    "role": role
+                    "role": role,
+                    "lojas": lojas,
+                    "password": hash_password(senha)
                 }
-                save_users(users)
-                st.success("Usuário criado com sucesso")
+
+                insert("users", usuario, novo_user)
+
+                st.success("Usuário cadastrado com sucesso!")
                 st.rerun()
+
+    # ===============================
+    # ABA 2 — LISTAGEM
+    # ===============================
+    with abas[1]:
+        st.markdown("### Usuários do sistema")
+
+        if not users:
+            st.info("Nenhum usuário cadastrado")
+        else:
+            for u, data in users.items():
+                with st.expander(f"👤 {data['name']} ({u})"):
+                    st.write(f"**Cargo:** {data['cargo']}")
+                    st.write(f"**Setor:** {data['setor']}")
+                    st.write(f"**Perfil:** {data['role']}")
+                    st.write(f"**Lojas:** {', '.join(data.get('lojas', []))}")
