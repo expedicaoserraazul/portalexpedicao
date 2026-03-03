@@ -2,7 +2,7 @@ import streamlit as st
 from dal.manager import load, save
 
 # ================================
-# 📦 Cadastro de Fornecedor — Atualizado com Endereço
+# 📦 Cadastro de Fornecedor — Matriz e Filiais
 # ================================
 
 PRAZOS_FLAGS = [
@@ -11,11 +11,20 @@ PRAZOS_FLAGS = [
     "7 dias fora do estado"
 ]
 
+UFS = [
+    "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA",
+    "MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN",
+    "RS","RO","RR","SC","SP","SE","TO"
+]
+
 
 def tela_fornecedores():
     st.title("🏭 Cadastro de Fornecedores")
 
     fornecedores = load("fornecedores")
+
+    if "filiais_temp" not in st.session_state:
+        st.session_state.filiais_temp = []
 
     st.subheader("➕ Novo fornecedor")
 
@@ -26,7 +35,7 @@ def tela_fornecedores():
 
     with col1:
         nome = st.text_input("Nome do fornecedor")
-        cnpj = st.text_input("CNPJ")
+        cnpj_matriz = st.text_input("CNPJ Matriz")
         divisao = st.text_input("Divisão")
         comprador = st.text_input("Comprador")
 
@@ -35,10 +44,10 @@ def tela_fornecedores():
         prazo_flags = st.multiselect("Prazo estendido", PRAZOS_FLAGS)
 
     # ================================
-    # Endereço
+    # Endereço da Matriz
     # ================================
     st.markdown("---")
-    st.subheader("📍 Endereço")
+    st.subheader("📍 Endereço da Matriz")
 
     col_end1, col_end2 = st.columns(2)
 
@@ -51,28 +60,55 @@ def tela_fornecedores():
     with col_end2:
         bairro = st.text_input("Bairro")
         cidade = st.text_input("Cidade")
-        ufs = [
-            "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA",
-            "MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN",
-            "RS","RO","RR","SC","SP","SE","TO"
-        ]
-        estado = st.selectbox("Estado (UF)", ufs)
+        estado = st.selectbox("Estado (UF)", UFS)
+
+    # ================================
+    # Filiais
+    # ================================
+    st.markdown("---")
+    st.subheader("🏢 Filiais")
+
+    with st.expander("Adicionar filial"):
+        filial_nome = st.text_input("Nome da filial")
+        filial_cnpj = st.text_input("CNPJ da filial")
+
+        if st.button("Adicionar filial"):
+            if filial_nome and filial_cnpj:
+                st.session_state.filiais_temp.append({
+                    "nome": filial_nome,
+                    "cnpj": filial_cnpj
+                })
+                st.success("Filial adicionada")
+                st.rerun()
+            else:
+                st.error("Informe nome e CNPJ da filial")
+
+    if st.session_state.filiais_temp:
+        st.markdown("**Filiais adicionadas:**")
+        for i, filial in enumerate(st.session_state.filiais_temp):
+            col_a, col_b = st.columns([4,1])
+            with col_a:
+                st.write(f"{filial['nome']} - {filial['cnpj']}")
+            with col_b:
+                if st.button("❌", key=f"del_filial_{i}"):
+                    st.session_state.filiais_temp.pop(i)
+                    st.rerun()
 
     # ================================
     # Salvamento
     # ================================
     if st.button("💾 Salvar fornecedor"):
-        if not nome or not cnpj:
-            st.error("Nome e CNPJ são obrigatórios")
+        if not nome or not cnpj_matriz:
+            st.error("Nome e CNPJ Matriz são obrigatórios")
         else:
             fornecedores[nome] = {
                 "nome": nome,
-                "cnpj": cnpj,
+                "cnpj_matriz": cnpj_matriz,
                 "divisao": divisao,
                 "comprador": comprador,
                 "condicao_pagamento": condicao_pag,
                 "prazo_estendido_flags": prazo_flags,
-                "endereco": {
+                "endereco_matriz": {
                     "cep": cep,
                     "logradouro": logradouro,
                     "numero": numero,
@@ -80,11 +116,13 @@ def tela_fornecedores():
                     "bairro": bairro,
                     "cidade": cidade,
                     "estado": estado
-                }
+                },
+                "filiais": st.session_state.filiais_temp
             }
 
             save("fornecedores", fornecedores)
-            st.success("Fornecedor cadastrado com sucesso")
+            st.session_state.filiais_temp = []
+            st.success("Fornecedor salvo com matriz e filiais")
             st.rerun()
 
     # ================================
@@ -98,32 +136,29 @@ def tela_fornecedores():
         return
 
     for k, f in fornecedores.items():
-        with st.expander(f"🏭 {f.get('nome','')} - {f.get('cnpj','')}"):
+        with st.expander(f"🏭 {f.get('nome','')} - {f.get('cnpj_matriz','')}"):
             st.write(f"**Divisão:** {f.get('divisao','')}")
             st.write(f"**Comprador:** {f.get('comprador','')}")
             st.write(f"**Condição de pagamento:** {f.get('condicao_pagamento',0)} dias")
             st.write(f"**Prazo estendido:** {', '.join(f.get('prazo_estendido_flags',[]))}")
 
-            endereco = f.get("endereco", {})
-
-            st.markdown("**Endereço:**")
+            endereco = f.get("endereco_matriz", {})
+            st.markdown("**Endereço Matriz:**")
             st.write(
                 f"{endereco.get('logradouro','')}, {endereco.get('numero','')} - {endereco.get('bairro','')}"
             )
             st.write(
                 f"{endereco.get('cidade','')} - {endereco.get('estado','')} | CEP: {endereco.get('cep','')}"
             )
-            if endereco.get("complemento"):
-                st.write(f"Complemento: {endereco.get('complemento')}")
 
-            col_a, col_b = st.columns(2)
+            filiais = f.get("filiais", [])
+            if filiais:
+                st.markdown("**Filiais:**")
+                for filial in filiais:
+                    st.write(f"- {filial.get('nome')} - {filial.get('cnpj')}")
 
-            with col_a:
-                if st.button("🗑 Excluir", key=f"del_{k}"):
-                    del fornecedores[k]
-                    save("fornecedores", fornecedores)
-                    st.rerun()
-
-            with col_b:
-                st.caption("Edição será implementada na próxima etapa")
+            if st.button("🗑 Excluir", key=f"del_{k}"):
+                del fornecedores[k]
+                save("fornecedores", fornecedores)
+                st.rerun()
 
