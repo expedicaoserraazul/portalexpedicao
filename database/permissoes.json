@@ -24,7 +24,9 @@
     "tarefa_recebimento": ["ver"]
   },
 
-    "compras consumo": {
+  "compras_uso_consumo": {
     "home": ["ver"],
-    "tarefa_recebimento": ["ver"]
+    "fornecedores": ["ver"],
+    "tarefa_recebimento": ["ver", "editar"]
+  }
 }
