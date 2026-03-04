@@ -1,9 +1,8 @@
 {
-    "home": "Home",
-    "admin": "Administração",
-    "fornecedores": "Fornecedores",
-    "modulos": "Módulos",
-    "tarefa_recebimento": {
-        "nome": "Autorizar Recebimento"
-    "configuracoes": "Configurações"
+  "home": { "nome": "Home" },
+  "admin": { "nome": "Administração" },
+  "fornecedores": { "nome": "Fornecedores" },
+  "tarefa_recebimento": { "nome": "Autorizar Recebimento" },
+  "modulos": { "nome": "Módulos" },
+  "configuracoes": { "nome": "Configurações" }
 }
