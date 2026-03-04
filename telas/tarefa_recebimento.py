@@ -55,23 +55,40 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
     st.title("AUTORIZAR RECEBIMENTO DE MERCADORIAS")
 
-    # 🔥 CSS PARA FIXAR BOTÕES
-    st.markdown("""
+    # =====================================================
+    # 🔥 ALTERAÇÃO 1 + 2 — BARRA FIXA COM COR DINÂMICA
+    # =====================================================
+
+    cores_setor = {
+        "expedição": "#1f77b4",
+        "compras": "#ff7f0e",
+        "cadastro": "#2ca02c",
+        "prevenção": "#d62728",
+        "uso e consumo": "#9467bd"
+    }
+
+    cor_barra = cores_setor.get(usuario.lower(), "#0e1117")
+
+    st.markdown(f"""
     <style>
-    .fixed-bottom {
+    .footer-fixo {{
         position: fixed;
         bottom: 0;
-        left: 21rem;
-        right: 0;
-        background-color: #0e1117;
-        padding: 15px 20px;
-        border-top: 1px solid #333;
+        left: 0;
+        width: 100%;
+        background-color: {cor_barra};
+        padding: 15px 30px;
         z-index: 9999;
-        box-shadow: 0 -4px 10px rgba(0,0,0,0.4);
-    }
-    .main {
+        box-shadow: 0 -4px 12px rgba(0,0,0,0.4);
+    }}
+
+    .footer-fixo button {{
+        width: 100%;
+    }}
+
+    section.main > div {{
         padding-bottom: 140px;
-    }
+    }}
     </style>
     """, unsafe_allow_html=True)
 
@@ -181,14 +198,13 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     st.subheader("Anexar Notas para Autorizar Recebimento")
     st.file_uploader("Upload de notas", accept_multiple_files=True)
 
-    # ESPAÇO PARA NÃO SOBREPOR CONTEÚDO
     st.markdown("<br><br><br><br><br>", unsafe_allow_html=True)
 
     # ==============================
-    # BOTÕES FIXOS
+    # 🔥 BOTÕES FIXOS
     # ==============================
 
-    st.markdown('<div class="fixed-bottom">', unsafe_allow_html=True)
+    st.markdown('<div class="footer-fixo">', unsafe_allow_html=True)
 
     col1, col2, col3, col4, col5 = st.columns(5)
 
@@ -209,6 +225,6 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-    if usuario == "prevenção":
+    if usuario.lower() == "prevenção":
         if st.button("FINALIZAR TAREFA"):
             st.success("Tarefa finalizada e enviada ao Financeiro")
