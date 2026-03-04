@@ -35,18 +35,39 @@ DIVERGENCIAS = [
 ]
 
 
-def calcular_vencimento(dias):
-    return datetime.now().date() + timedelta(days=dias)
+# ==============================================
+# FUNÇÕES AUXILIARES
+# ==============================================
 
+def calcular_vencimento(dias):
+    return datetime.now().date() + timedelta(days=int(dias))
+
+
+def formatar_data(data_obj):
+    if not data_obj:
+        return "-"
+    if isinstance(data_obj, str):
+        try:
+            data_obj = datetime.fromisoformat(data_obj).date()
+        except:
+            return data_obj
+    return data_obj.strftime("%d/%m/%y")
+
+
+# ==============================================
+# TELA PRINCIPAL
+# ==============================================
 
 def tela_tarefa(usuario="prevenção", loja="Loja 01"):
+
     st.title("AUTORIZAR RECEBIMENTO DE MERCADORIAS")
 
-    fornecedores_db = load("fornecedores")
+    fornecedores_db = load("fornecedores") or {}
 
     # ==============================
     # Cabeçalho automático
     # ==============================
+
     st.markdown(f"**Prevenção:** {usuario}")
     st.markdown(f"**Loja:** {loja}")
 
@@ -55,6 +76,7 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     # ==============================
     # BLOCO 1 - Fornecedores
     # ==============================
+
     st.subheader("Bloco 1")
 
     fornecedores_nomes = list(fornecedores_db.keys())
@@ -70,16 +92,24 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
     notas = st.text_input("Notas (informar números separados por vírgula)")
 
-    # Renderizar blocos dinamicamente
-    for i, nome in enumerate(selecionados):
+    # ==============================
+    # Renderizar fornecedores selecionados
+    # ==============================
+
+    for nome in selecionados:
+
         st.markdown("---")
-        st.subheader(f"Fornecedor {i+1}")
 
         if nome == "Outros":
-            st.write(f"Fornecedor: {fornecedor_outro}")
+            st.subheader(fornecedor_outro if fornecedor_outro else "Fornecedor (Outros)")
             continue
 
         dados = fornecedores_db.get(nome, {})
+
+        # 🔥 AGORA MOSTRA O NOME REAL
+        razao_social = dados.get("razao_social") or nome
+        st.subheader(razao_social)
+
         divisao = dados.get("divisao", "-")
         prazo = dados.get("condicao_pagamento", 0)
 
@@ -87,18 +117,19 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
         prazo_estendido = 0
         if dados.get("prazo_estendido_flags"):
-            prazo_estendido = 3  # placeholder (depois aplicar regra real)
+            prazo_estendido = 3  # regra futura pode ser dinâmica
 
-        venc_estendido = calcular_vencimento(prazo + prazo_estendido)
+        venc_estendido = calcular_vencimento(int(prazo) + int(prazo_estendido))
 
         st.write(f"Divisão: {divisao}")
         st.write(f"Prazo: {prazo} dias")
-        st.write(f"Venc Normal: {venc_normal}")
-        st.write(f"Venc Estendido: {venc_estendido}")
+        st.write(f"Venc Normal: {formatar_data(venc_normal)}")
+        st.write(f"Venc Estendido: {formatar_data(venc_estendido)}")
 
     # ==============================
     # Categorias e Pendências
     # ==============================
+
     st.markdown("---")
     st.subheader("Categorias")
     categorias_sel = st.multiselect("Selecione categorias", CATEGORIAS)
@@ -109,6 +140,7 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     # ==============================
     # Mensagens
     # ==============================
+
     st.markdown("---")
     st.subheader("Mensagens")
 
@@ -130,26 +162,29 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
         st.write(f"[{msg['data']}] {msg['usuario']}: {msg['texto']}")
 
     # ==============================
-    # Divergências (Expedição)
+    # Divergências
     # ==============================
+
     st.markdown("---")
     st.subheader("Divergências")
 
     for div in DIVERGENCIAS:
         if st.checkbox(div):
-            nf = st.text_input(f"Informar NF - {div}")
-            arquivo = st.file_uploader(f"Anexar arquivo - {div}")
+            st.text_input(f"Informar NF - {div}")
+            st.file_uploader(f"Anexar arquivo - {div}")
 
     # ==============================
     # Anexos gerais
     # ==============================
+
     st.markdown("---")
     st.subheader("Anexar Notas para Autorizar Recebimento")
-    anexos = st.file_uploader("Upload de notas", accept_multiple_files=True)
+    st.file_uploader("Upload de notas", accept_multiple_files=True)
 
     # ==============================
     # Botões de fluxo
     # ==============================
+
     st.markdown("---")
 
     col1, col2, col3, col4, col5 = st.columns(5)
