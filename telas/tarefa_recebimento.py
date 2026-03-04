@@ -172,8 +172,8 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 # ==============================
 # 🔥 BARRA FIXA REAL
 # ==============================
-
-st.markdown(f"""
+    
+    st.markdown(f"""
 <style>
 div[data-testid="stHorizontalBlock"] {{
     background-color: {cor_barra};
