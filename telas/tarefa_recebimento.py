@@ -178,7 +178,7 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     st.markdown("""
         <div class="texto-envio">
             ENVIAR TAREFA PARA
-            <span class="dois-pontos-vermelha">:</span>
+            <span class="seta-vermelha">➜➜</span>
         </div>
     """, unsafe_allow_html=True)
 
