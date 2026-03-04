@@ -1,15 +1,30 @@
 {
-    "admin": {
-        "home": ["acessar"],
-        "admin": ["acessar"],
-        "fornecedores": ["listar", "criar", "editar", "excluir"],
-        "modulos": ["listar", "criar", "editar", "excluir"],
-        "configuracoes": ["listar", "editar"]
-         "tarefa_recebimento": ["ver", "editar"]
-    },
-    "user": {
-        "home": ["acessar"],
-        "fornecedores": ["listar"]
-         "tarefa_recebimento": ["ver", "editar"]
-    }
+  "admin": {
+    "home": ["ver"],
+    "admin": ["ver", "editar"],
+    "fornecedores": ["ver", "editar"],
+    "tarefa_recebimento": ["ver", "editar"],
+    "modulos": ["ver"],
+    "configuracoes": ["ver"]
+  },
+
+  "prevenção": {
+    "home": ["ver"],
+    "fornecedores": ["ver"],
+    "tarefa_recebimento": ["ver", "editar"]
+  },
+
+  "expedicao": {
+    "home": ["ver"],
+    "tarefa_recebimento": ["ver"]
+  },
+
+  "compras": {
+    "home": ["ver"],
+    "tarefa_recebimento": ["ver"]
+  },
+
+    "compras consumo": {
+    "home": ["ver"],
+    "tarefa_recebimento": ["ver"]
 }
