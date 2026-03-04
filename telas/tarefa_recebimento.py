@@ -34,14 +34,8 @@ DIVERGENCIAS = [
     "DIVERGÊNCIA DE NOTA DE BONIFICAÇÃO 100% SEM PEDIDO"
 ]
 
-
-# ==============================================
-# FUNÇÕES AUXILIARES
-# ==============================================
-
 def calcular_vencimento(dias):
     return datetime.now().date() + timedelta(days=int(dias))
-
 
 def formatar_data(data_obj):
     if not data_obj:
@@ -53,7 +47,6 @@ def formatar_data(data_obj):
             return data_obj
     return data_obj.strftime("%d/%m/%y")
 
-
 # ==============================================
 # TELA PRINCIPAL
 # ==============================================
@@ -62,19 +55,34 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
     st.title("AUTORIZAR RECEBIMENTO DE MERCADORIAS")
 
-    fornecedores_db = load("fornecedores") or {}
+    # 🔥 CSS PARA FIXAR BOTÕES
+    st.markdown("""
+    <style>
+    .fixed-bottom {
+        position: fixed;
+        bottom: 0;
+        left: 21rem;
+        right: 0;
+        background-color: #0e1117;
+        padding: 15px 20px;
+        border-top: 1px solid #333;
+        z-index: 9999;
+        box-shadow: 0 -4px 10px rgba(0,0,0,0.4);
+    }
+    .main {
+        padding-bottom: 140px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-    # ==============================
-    # Cabeçalho automático
-    # ==============================
+    fornecedores_db = load("fornecedores") or {}
 
     st.markdown(f"**Prevenção:** {usuario}")
     st.markdown(f"**Loja:** {loja}")
-
     st.markdown("---")
 
     # ==============================
-    # BLOCO 1 - Fornecedores
+    # BLOCO 1
     # ==============================
 
     st.subheader("Bloco 1")
@@ -90,11 +98,7 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     if "Outros" in selecionados:
         fornecedor_outro = st.text_input("Nome fornecedor (Outros)")
 
-    notas = st.text_input("Notas (informar números separados por vírgula)")
-
-    # ==============================
-    # Renderizar fornecedores selecionados
-    # ==============================
+    st.text_input("Notas (informar números separados por vírgula)")
 
     for nome in selecionados:
 
@@ -106,7 +110,6 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
         dados = fornecedores_db.get(nome, {})
 
-        # 🔥 AGORA MOSTRA O NOME REAL
         razao_social = dados.get("razao_social") or nome
         st.subheader(razao_social)
 
@@ -115,10 +118,7 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
         venc_normal = calcular_vencimento(prazo)
 
-        prazo_estendido = 0
-        if dados.get("prazo_estendido_flags"):
-            prazo_estendido = 3  # regra futura pode ser dinâmica
-
+        prazo_estendido = 3 if dados.get("prazo_estendido_flags") else 0
         venc_estendido = calcular_vencimento(int(prazo) + int(prazo_estendido))
 
         st.write(f"Divisão: {divisao}")
@@ -127,15 +127,15 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
         st.write(f"Venc Estendido: {formatar_data(venc_estendido)}")
 
     # ==============================
-    # Categorias e Pendências
+    # Categorias
     # ==============================
 
     st.markdown("---")
     st.subheader("Categorias")
-    categorias_sel = st.multiselect("Selecione categorias", CATEGORIAS)
+    st.multiselect("Selecione categorias", CATEGORIAS)
 
     st.subheader("Pendências")
-    pendencias_sel = st.multiselect("Selecione pendências", PENDENCIAS)
+    st.multiselect("Selecione pendências", PENDENCIAS)
 
     # ==============================
     # Mensagens
@@ -174,26 +174,40 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
             st.file_uploader(f"Anexar arquivo - {div}")
 
     # ==============================
-    # Anexos gerais
+    # Anexos
     # ==============================
 
     st.markdown("---")
     st.subheader("Anexar Notas para Autorizar Recebimento")
     st.file_uploader("Upload de notas", accept_multiple_files=True)
 
+    # ESPAÇO PARA NÃO SOBREPOR CONTEÚDO
+    st.markdown("<br><br><br><br><br>", unsafe_allow_html=True)
+
     # ==============================
-    # Botões de fluxo
+    # BOTÕES FIXOS
     # ==============================
 
-    st.markdown("---")
+    st.markdown('<div class="fixed-bottom">', unsafe_allow_html=True)
 
     col1, col2, col3, col4, col5 = st.columns(5)
 
-    col1.button("Enviar para Expedição")
-    col2.button("Enviar para Compras")
-    col3.button("Enviar para Cadastro")
-    col4.button("Enviar para Prevenção")
-    col5.button("Enviar para Uso e Consumo")
+    with col1:
+        st.button("Enviar para Expedição")
+
+    with col2:
+        st.button("Enviar para Compras")
+
+    with col3:
+        st.button("Enviar para Cadastro")
+
+    with col4:
+        st.button("Enviar para Prevenção")
+
+    with col5:
+        st.button("Enviar para Uso e Consumo")
+
+    st.markdown('</div>', unsafe_allow_html=True)
 
     if usuario == "prevenção":
         if st.button("FINALIZAR TAREFA"):
