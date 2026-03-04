@@ -5,6 +5,7 @@ from admin.painel import painel_admin
 from security.authorization import modulos_permitidos
 from telas.tarefa_recebimento import tela_tarefa
 
+# 🔥 LAYOUT CORRETO
 st.set_page_config(page_title="Portal Expedição", layout="wide")
 
 # ---------- SESSION INIT ----------
@@ -68,8 +69,9 @@ else:
         tela_fornecedores()
 
     elif menu_key == "tarefa_recebimento":
+        # 🔥 ALTERAÇÃO 2 APLICADA AQUI
         tela_tarefa(
-            usuario=st.session_state.user["name"],
+            usuario=st.session_state.user["setor"],  # AGORA PASSA O SETOR
             loja=st.session_state.user.get("loja", "Loja não definida")
         )
 
@@ -80,4 +82,3 @@ else:
     elif menu_key == "configuracoes":
         st.title("⚙️ Configurações do Sistema")
         st.info("Configurações gerais da plataforma")
-
