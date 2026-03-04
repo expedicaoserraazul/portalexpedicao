@@ -3,5 +3,7 @@
     "admin": "Administração",
     "fornecedores": "Fornecedores",
     "modulos": "Módulos",
+    "tarefa_recebimento": {
+        "nome": "Autorizar Recebimento"
     "configuracoes": "Configurações"
 }
