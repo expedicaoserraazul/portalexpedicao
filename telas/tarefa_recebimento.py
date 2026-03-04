@@ -1,10 +1,6 @@
 import streamlit as st
 from datetime import datetime, timedelta
-from dal.manager import load
-
-# ==============================
-# LISTAS
-# ==============================
+from dal.manager import load, save
 
 CATEGORIAS = [
     "Açougue","Bebidas","Cadastro","Commodities","Hortifruti","Hplu",
@@ -33,10 +29,6 @@ DIVERGENCIAS = [
     "DIVERGÊNCIA DE NOTA DE BONIFICAÇÃO 100% SEM PEDIDO"
 ]
 
-# ==============================
-# FUNÇÕES AUXILIARES
-# ==============================
-
 def calcular_vencimento(dias):
     return datetime.now().date() + timedelta(days=int(dias))
 
@@ -51,20 +43,15 @@ def formatar_data(data_obj):
     return data_obj.strftime("%d/%m/%y")
 
 
-# ==============================
-# TELA PRINCIPAL
-# ==============================
-
 def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
     st.title("AUTORIZAR RECEBIMENTO DE MERCADORIAS")
 
     # ==============================
-    # COR DINÂMICA POR SETOR
+    # 🎨 COR DINÂMICA POR SETOR
     # ==============================
 
     cores_setor = {
-        "admin": "#0d6efd",
         "expedição": "#1f77b4",
         "compras": "#ff7f0e",
         "cadastro": "#2ca02c",
@@ -72,40 +59,46 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
         "uso e consumo": "#9467bd"
     }
 
-    usuario_normalizado = usuario.strip().lower()
-    cor_barra = cores_setor.get(usuario_normalizado, "#111111")
+    cor_barra = cores_setor.get(usuario.lower(), "#111111")
 
     # ==============================
-    # CSS GLOBAL
+    # 🔥 CSS DA BARRA FIXA
     # ==============================
 
     st.markdown(f"""
     <style>
-
-    /* espaço para não cobrir conteúdo */
-    .block-container {{
-        padding-bottom: 200px;
-    }}
-
-    /* container da barra fixa */
-    div[data-testid="stVerticalBlock"]:has(.barra-marker) {{
+    .barra-fixa {{
         position: fixed;
         bottom: 0;
         left: 0;
         width: 100%;
         background-color: {cor_barra};
-        padding: 20px 40px 25px 40px;
+        padding: 15px 25px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         z-index: 999999;
-        box-shadow: 0 -5px 20px rgba(0,0,0,0.4);
+        box-shadow: 0 -4px 15px rgba(0,0,0,0.5);
     }}
 
-    .barra-titulo {{
+    .texto-envio {{
         color: white;
         font-weight: bold;
-        margin-bottom: 10px;
         font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }}
 
+    .seta-vermelha {{
+        color: red;
+        font-size: 20px;
+        font-weight: bold;
+    }}
+
+    section.main > div {{
+        padding-bottom: 140px;
+    }}
     </style>
     """, unsafe_allow_html=True)
 
@@ -116,7 +109,7 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     st.markdown("---")
 
     # ==============================
-    # FORNECEDORES
+    # BLOCO FORNECEDORES
     # ==============================
 
     fornecedores_nomes = list(fornecedores_db.keys())
@@ -126,8 +119,9 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
         fornecedores_nomes + ["Outros"]
     )
 
+    fornecedor_outro = None
     if "Outros" in selecionados:
-        st.text_input("Nome fornecedor (Outros)")
+        fornecedor_outro = st.text_input("Nome fornecedor (Outros)")
 
     st.text_input("Notas (separadas por vírgula)")
 
@@ -136,7 +130,7 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
         st.markdown("---")
 
         if nome == "Outros":
-            st.subheader("Fornecedor (Outros)")
+            st.subheader(fornecedor_outro if fornecedor_outro else "Fornecedor (Outros)")
             continue
 
         dados = fornecedores_db.get(nome, {})
@@ -172,29 +166,37 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
             st.text_input(f"Informar NF - {div}")
             st.file_uploader(f"Anexar - {div}")
 
+    # Espaço para scroll
+    st.markdown("<br><br><br><br><br>", unsafe_allow_html=True)
+
     # ==============================
-    # BARRA FIXA REAL
+    # 🔥 BARRA FIXA COM BOTÕES
     # ==============================
 
-    barra = st.container()
+    st.markdown('<div class="barra-fixa">', unsafe_allow_html=True)
 
-    with barra:
-        st.markdown("<div class='barra-marker'></div>", unsafe_allow_html=True)
-        st.markdown("<div class='barra-titulo'>ENVIAR TAREFA PARA :</div>", unsafe_allow_html=True)
+    st.markdown("""
+        <div class="texto-envio">
+            ENVIAR TAREFA PARA
+            <span class="seta-vermelha">➜➜</span>
+        </div>
+    """, unsafe_allow_html=True)
 
-        col1, col2, col3, col4, col5 = st.columns(5)
+    col1, col2, col3, col4, col5 = st.columns(5)
 
-        with col1:
-            st.button("Expedição", use_container_width=True)
+    with col1:
+        st.button("Expedição", use_container_width=True)
 
-        with col2:
-            st.button("Compras", use_container_width=True)
+    with col2:
+        st.button("Compras", use_container_width=True)
 
-        with col3:
-            st.button("Cadastro", use_container_width=True)
+    with col3:
+        st.button("Cadastro", use_container_width=True)
 
-        with col4:
-            st.button("Prevenção", use_container_width=True)
+    with col4:
+        st.button("Prevenção", use_container_width=True)
 
-        with col5:
-            st.button("Uso e Consumo", use_container_width=True)
+    with col5:
+        st.button("Uso e Consumo", use_container_width=True)
+
+    st.markdown("</div>", unsafe_allow_html=True)
