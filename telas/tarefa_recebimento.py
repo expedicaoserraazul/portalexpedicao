@@ -169,58 +169,34 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     # Espaço para scroll
     st.markdown("<br><br><br><br><br>", unsafe_allow_html=True)
 
-# ==============================
-# 🔥 BARRA FIXA REAL
-# ==============================
-    
-    st.markdown(f"""
-<style>
-div[data-testid="stHorizontalBlock"] {{
-    background-color: {cor_barra};
-    padding: 15px;
-    border-radius: 0px;
-}}
+    # ==============================
+    # 🔥 BARRA FIXA COM BOTÕES
+    # ==============================
 
-.fixed-bottom {{
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    z-index: 999999;
-    background-color: {cor_barra};
-    padding: 10px 30px 20px 30px;
-    box-shadow: 0 -4px 15px rgba(0,0,0,0.5);
-}}
+    st.markdown('<div class="barra-fixa">', unsafe_allow_html=True)
 
-section.main > div {{
-    padding-bottom: 160px;
-}}
-</style>
-""", unsafe_allow_html=True)
+    st.markdown("""
+        <div class="texto-envio">
+            ENVIAR TAREFA PARA
+            <span class="seta-vermelha">➜➜</span>
+        </div>
+    """, unsafe_allow_html=True)
 
-st.markdown('<div class="fixed-bottom">', unsafe_allow_html=True)
+    col1, col2, col3, col4, col5 = st.columns(5)
 
-st.markdown(
-    "<div style='color:white;font-weight:bold;margin-bottom:10px;'>"
-    "ENVIAR TAREFA PARA :</div>",
-    unsafe_allow_html=True
-)
+    with col1:
+        st.button("Expedição", use_container_width=True)
 
-col1, col2, col3, col4, col5 = st.columns(5)
+    with col2:
+        st.button("Compras", use_container_width=True)
 
-with col1:
-    st.button("Expedição", use_container_width=True)
+    with col3:
+        st.button("Cadastro", use_container_width=True)
 
-with col2:
-    st.button("Compras", use_container_width=True)
+    with col4:
+        st.button("Prevenção", use_container_width=True)
 
-with col3:
-    st.button("Cadastro", use_container_width=True)
+    with col5:
+        st.button("Uso e Consumo", use_container_width=True)
 
-with col4:
-    st.button("Prevenção", use_container_width=True)
-
-with col5:
-    st.button("Uso e Consumo", use_container_width=True)
-
-st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
