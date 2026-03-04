@@ -52,7 +52,6 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     # ==============================
 
     cores_setor = {
-        "admin": "#0d6efd",
         "expedição": "#1f77b4",
         "compras": "#ff7f0e",
         "cadastro": "#2ca02c",
