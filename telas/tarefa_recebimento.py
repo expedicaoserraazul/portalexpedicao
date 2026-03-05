@@ -2,6 +2,10 @@ import streamlit as st
 from datetime import datetime, timedelta
 from dal.manager import load
 
+# =========================================
+# LISTAS
+# =========================================
+
 CATEGORIAS = [
     "Açougue","Bebidas","Cadastro","Commodities","Hortifruti","Hplu",
     "Mercearia salgada","Mercearias doce","Padaria","Perecíveis","Uso e consumo"
@@ -29,23 +33,41 @@ DIVERGENCIAS = [
     "DIVERGÊNCIA DE NOTA DE BONIFICAÇÃO 100% SEM PEDIDO"
 ]
 
+# =========================================
+# FUNÇÕES
+# =========================================
+
 def calcular_vencimento(dias):
     return datetime.now().date() + timedelta(days=int(dias))
 
+
 def formatar_data(data_obj):
+
     if not data_obj:
         return "-"
+
     if isinstance(data_obj, str):
         try:
             data_obj = datetime.fromisoformat(data_obj).date()
         except:
             return data_obj
+
     return data_obj.strftime("%d/%m/%y")
 
 
+# =========================================
+# TELA PRINCIPAL
+# =========================================
+
 def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
+    st.set_page_config(layout="wide")
+
     st.title("AUTORIZAR RECEBIMENTO DE MERCADORIAS")
+
+    # =========================================
+    # CORES POR SETOR
+    # =========================================
 
     cores_setor = {
         "expedição": "#1f77b4",
@@ -58,44 +80,32 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
     cor_barra = cores_setor.get(usuario.lower(), "#111111")
 
-    # CSS
+    # =========================================
+    # CSS DA BARRA FIXA
+    # =========================================
+
     st.markdown(f"""
     <style>
 
     .block-container {{
-        padding-bottom:120px;
+        padding-bottom:140px;
     }}
 
-    .barra-envio {{
+    .barra-fixa {{
         position:fixed;
         bottom:0;
-        left:260px;
-        right:0;
+        left:0;
+        width:100%;
         background:{cor_barra};
         padding:18px;
         z-index:9999;
         box-shadow:0 -4px 15px rgba(0,0,0,0.4);
     }}
 
-    .barra-botoes {{
-        display:flex;
-        gap:10px;
-        margin-top:10px;
-    }}
-
-    .barra-botoes button {{
-        flex:1;
-        padding:10px;
-        border-radius:8px;
-        border:none;
-        background:#111;
+    .texto-envio {{
         color:white;
         font-weight:bold;
-        cursor:pointer;
-    }}
-
-    .barra-botoes button:hover {{
-        background:#333;
+        margin-bottom:10px;
     }}
 
     </style>
@@ -106,6 +116,10 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     st.markdown(f"**Usuário:** {usuario}")
     st.markdown(f"**Loja:** {loja}")
     st.markdown("---")
+
+    # =========================================
+    # FORNECEDORES
+    # =========================================
 
     fornecedores_nomes = list(fornecedores_db.keys())
 
@@ -128,6 +142,7 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
             continue
 
         dados = fornecedores_db.get(nome, {})
+
         razao_social = dados.get("razao_social") or nome
         prazo = dados.get("condicao_pagamento", 0)
 
@@ -137,38 +152,72 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
         st.write(f"Prazo: {prazo} dias")
         st.write(f"Vencimento: {formatar_data(venc_normal)}")
 
+    # =========================================
+    # CATEGORIAS
+    # =========================================
+
     st.markdown("---")
+
     st.subheader("Categorias")
-    st.multiselect("Selecione categorias", CATEGORIAS)
+
+    st.multiselect(
+        "Selecione categorias",
+        CATEGORIAS
+    )
 
     st.subheader("Pendências")
-    st.multiselect("Selecione pendências", PENDENCIAS)
+
+    st.multiselect(
+        "Selecione pendências",
+        PENDENCIAS
+    )
+
+    # =========================================
+    # DIVERGÊNCIAS
+    # =========================================
 
     st.markdown("---")
+
     st.subheader("Divergências")
 
     for div in DIVERGENCIAS:
+
         if st.checkbox(div):
+
             st.text_input(f"Informar NF - {div}")
             st.file_uploader(f"Anexar - {div}")
 
+    # =========================================
     # BARRA FIXA
-    st.markdown(f"""
-    <div class="barra-envio">
+    # =========================================
 
-    <div style="color:white;font-weight:bold;">
-    ENVIAR TAREFA PARA :
-    </div>
+    st.markdown('<div class="barra-fixa">', unsafe_allow_html=True)
 
-    <div class="barra-botoes">
+    st.markdown(
+        '<div class="texto-envio">ENVIAR TAREFA PARA :</div>',
+        unsafe_allow_html=True
+    )
 
-    <button onclick="window.parent.postMessage({{type:'streamlit:setComponentValue',value:'expedicao'}},'*')">Expedição</button>
-    <button onclick="window.parent.postMessage({{type:'streamlit:setComponentValue',value:'compras'}},'*')">Compras</button>
-    <button onclick="window.parent.postMessage({{type:'streamlit:setComponentValue',value:'cadastro'}},'*')">Cadastro</button>
-    <button onclick="window.parent.postMessage({{type:'streamlit:setComponentValue',value:'prevencao'}},'*')">Prevenção</button>
-    <button onclick="window.parent.postMessage({{type:'streamlit:setComponentValue',value:'uso'}},'*')">Uso e Consumo</button>
+    col1, col2, col3, col4, col5 = st.columns(5)
 
-    </div>
+    with col1:
+        if st.button("Expedição", use_container_width=True):
+            st.success("Tarefa enviada para Expedição")
 
-    </div>
-    """, unsafe_allow_html=True)
+    with col2:
+        if st.button("Compras", use_container_width=True):
+            st.success("Tarefa enviada para Compras")
+
+    with col3:
+        if st.button("Cadastro", use_container_width=True):
+            st.success("Tarefa enviada para Cadastro")
+
+    with col4:
+        if st.button("Prevenção", use_container_width=True):
+            st.success("Tarefa enviada para Prevenção")
+
+    with col5:
+        if st.button("Uso e Consumo", use_container_width=True):
+            st.success("Tarefa enviada para Uso e Consumo")
+
+    st.markdown('</div>', unsafe_allow_html=True)
