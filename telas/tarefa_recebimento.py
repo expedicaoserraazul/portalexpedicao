@@ -2,10 +2,6 @@ import streamlit as st
 from datetime import datetime, timedelta
 from dal.manager import load
 
-# =========================================
-# LISTAS
-# =========================================
-
 CATEGORIAS = [
     "Açougue","Bebidas","Cadastro","Commodities","Hortifruti","Hplu",
     "Mercearia salgada","Mercearias doce","Padaria","Perecíveis","Uso e consumo"
@@ -33,42 +29,25 @@ DIVERGENCIAS = [
     "DIVERGÊNCIA DE NOTA DE BONIFICAÇÃO 100% SEM PEDIDO"
 ]
 
-# =========================================
-# FUNÇÕES
-# =========================================
-
 def calcular_vencimento(dias):
     return datetime.now().date() + timedelta(days=int(dias))
 
-
 def formatar_data(data_obj):
-
     if not data_obj:
         return "-"
-
     if isinstance(data_obj, str):
         try:
             data_obj = datetime.fromisoformat(data_obj).date()
         except:
             return data_obj
-
     return data_obj.strftime("%d/%m/%y")
 
 
-# =========================================
-# TELA PRINCIPAL
-# =========================================
-
 def tela_tarefa(usuario="prevenção", loja="Loja 01"):
-
-    st.set_page_config(layout="wide")
 
     st.title("AUTORIZAR RECEBIMENTO DE MERCADORIAS")
 
-    # =========================================
     # CORES POR SETOR
-    # =========================================
-
     cores_setor = {
         "expedição": "#1f77b4",
         "compras": "#ff7f0e",
@@ -80,10 +59,7 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
     cor_barra = cores_setor.get(usuario.lower(), "#111111")
 
-    # =========================================
-    # CSS DA BARRA FIXA
-    # =========================================
-
+    # CSS BARRA FIXA
     st.markdown(f"""
     <style>
 
@@ -91,21 +67,36 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
         padding-bottom:140px;
     }}
 
-    .barra-fixa {{
+    .barra-envio {{
         position:fixed;
         bottom:0;
         left:0;
-        width:100%;
+        right:0;
         background:{cor_barra};
         padding:18px;
         z-index:9999;
         box-shadow:0 -4px 15px rgba(0,0,0,0.4);
     }}
 
-    .texto-envio {{
+    .barra-botoes {{
+        display:flex;
+        gap:10px;
+        margin-top:10px;
+    }}
+
+    .barra-botoes button {{
+        flex:1;
+        padding:10px;
+        border-radius:8px;
+        border:none;
+        background:#111;
         color:white;
         font-weight:bold;
-        margin-bottom:10px;
+        cursor:pointer;
+    }}
+
+    .barra-botoes button:hover {{
+        background:#333;
     }}
 
     </style>
@@ -115,11 +106,12 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
     st.markdown(f"**Usuário:** {usuario}")
     st.markdown(f"**Loja:** {loja}")
+
     st.markdown("---")
 
-    # =========================================
-    # FORNECEDORES
-    # =========================================
+    # =========================
+    # FORNECEDOR
+    # =========================
 
     fornecedores_nomes = list(fornecedores_db.keys())
 
@@ -131,7 +123,28 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     if "Outros" in selecionados:
         st.text_input("Nome fornecedor (Outros)")
 
-    st.text_input("Notas (separadas por vírgula)")
+    # =========================
+    # NOTAS
+    # =========================
+
+    notas_input = st.text_input("Notas (separadas por barra '/')")
+
+    if notas_input:
+        lista_notas = [n.strip() for n in notas_input.split("/") if n.strip()]
+
+    # =========================
+    # ANEXAR NOTAS
+    # =========================
+
+    st.file_uploader(
+        "Anexar Notas para Autorizar Recebimento",
+        type=["pdf","xml","jpg","png"],
+        accept_multiple_files=True
+    )
+
+    # =========================
+    # FORNECEDORES SELECIONADOS
+    # =========================
 
     for nome in selecionados:
 
@@ -142,7 +155,6 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
             continue
 
         dados = fornecedores_db.get(nome, {})
-
         razao_social = dados.get("razao_social") or nome
         prazo = dados.get("condicao_pagamento", 0)
 
@@ -152,18 +164,21 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
         st.write(f"Prazo: {prazo} dias")
         st.write(f"Vencimento: {formatar_data(venc_normal)}")
 
-    # =========================================
+    # =========================
     # CATEGORIAS
-    # =========================================
+    # =========================
 
     st.markdown("---")
-
     st.subheader("Categorias")
 
     st.multiselect(
         "Selecione categorias",
         CATEGORIAS
     )
+
+    # =========================
+    # PENDÊNCIAS
+    # =========================
 
     st.subheader("Pendências")
 
@@ -172,52 +187,38 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
         PENDENCIAS
     )
 
-    # =========================================
+    # =========================
     # DIVERGÊNCIAS
-    # =========================================
+    # =========================
 
     st.markdown("---")
-
     st.subheader("Divergências")
 
     for div in DIVERGENCIAS:
-
         if st.checkbox(div):
-
             st.text_input(f"Informar NF - {div}")
             st.file_uploader(f"Anexar - {div}")
 
-    # =========================================
-    # BARRA FIXA
-    # =========================================
+    # =========================
+    # BARRA FIXA INFERIOR
+    # =========================
 
-    st.markdown('<div class="barra-fixa">', unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class="barra-envio">
 
-    st.markdown(
-        '<div class="texto-envio">ENVIAR TAREFA PARA :</div>',
-        unsafe_allow_html=True
-    )
+    <div style="color:white;font-weight:bold;">
+    ENVIAR TAREFA PARA :
+    </div>
 
-    col1, col2, col3, col4, col5 = st.columns(5)
+    <div class="barra-botoes">
 
-    with col1:
-        if st.button("Expedição", use_container_width=True):
-            st.success("Tarefa enviada para Expedição")
+    <button>Expedição</button>
+    <button>Compras</button>
+    <button>Cadastro</button>
+    <button>Prevenção</button>
+    <button>Uso e Consumo</button>
 
-    with col2:
-        if st.button("Compras", use_container_width=True):
-            st.success("Tarefa enviada para Compras")
+    </div>
 
-    with col3:
-        if st.button("Cadastro", use_container_width=True):
-            st.success("Tarefa enviada para Cadastro")
-
-    with col4:
-        if st.button("Prevenção", use_container_width=True):
-            st.success("Tarefa enviada para Prevenção")
-
-    with col5:
-        if st.button("Uso e Consumo", use_container_width=True):
-            st.success("Tarefa enviada para Uso e Consumo")
-
-    st.markdown('</div>', unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
