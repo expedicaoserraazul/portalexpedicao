@@ -2,6 +2,10 @@ import streamlit as st
 from datetime import datetime, timedelta
 from dal.manager import load
 
+# ==============================
+# LISTAS
+# ==============================
+
 CATEGORIAS = [
     "Açougue","Bebidas","Cadastro","Commodities","Hortifruti","Hplu",
     "Mercearia salgada","Mercearias doce","Padaria","Perecíveis","Uso e consumo"
@@ -29,6 +33,10 @@ DIVERGENCIAS = [
     "DIVERGÊNCIA DE NOTA DE BONIFICAÇÃO 100% SEM PEDIDO"
 ]
 
+# ==============================
+# FUNÇÕES
+# ==============================
+
 def calcular_vencimento(dias):
     return datetime.now().date() + timedelta(days=int(dias))
 
@@ -43,9 +51,17 @@ def formatar_data(data_obj):
     return data_obj.strftime("%d/%m/%y")
 
 
+# ==============================
+# TELA
+# ==============================
+
 def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
     st.title("AUTORIZAR RECEBIMENTO DE MERCADORIAS")
+
+    # ==============================
+    # CORES POR SETOR
+    # ==============================
 
     cores_setor = {
         "expedição": "#1f77b4",
@@ -58,44 +74,36 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
     cor_barra = cores_setor.get(usuario.lower(), "#111111")
 
-    # CSS
+    # ==============================
+    # CSS DA BARRA FIXA
+    # ==============================
+
     st.markdown(f"""
     <style>
 
+    /* espaço no final da página */
     .block-container {{
-        padding-bottom:120px;
+        padding-bottom: 160px;
     }}
 
+    /* barra fixa */
     .barra-envio {{
-        position:fixed;
-        bottom:0;
-        left:260px;
-        right:0;
-        background:{cor_barra};
-        padding:18px;
-        z-index:9999;
-        box-shadow:0 -4px 15px rgba(0,0,0,0.4);
+        position: fixed;
+        bottom: 0;
+        left: 260px;   /* espaço do menu lateral */
+        right: 0;
+        background-color: {cor_barra};
+        padding: 18px 35px;
+        border-top: 3px solid red;
+        z-index: 9999;
+        box-shadow: 0 -4px 15px rgba(0,0,0,0.5);
     }}
 
-    .barra-botoes {{
-        display:flex;
-        gap:10px;
-        margin-top:10px;
-    }}
-
-    .barra-botoes button {{
-        flex:1;
-        padding:10px;
-        border-radius:8px;
-        border:none;
-        background:#111;
-        color:white;
-        font-weight:bold;
-        cursor:pointer;
-    }}
-
-    .barra-botoes button:hover {{
-        background:#333;
+    .titulo-barra {{
+        color: white;
+        font-weight: bold;
+        margin-bottom: 10px;
+        font-size: 15px;
     }}
 
     </style>
@@ -106,6 +114,10 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     st.markdown(f"**Usuário:** {usuario}")
     st.markdown(f"**Loja:** {loja}")
     st.markdown("---")
+
+    # ==============================
+    # FORNECEDORES
+    # ==============================
 
     fornecedores_nomes = list(fornecedores_db.keys())
 
@@ -137,12 +149,20 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
         st.write(f"Prazo: {prazo} dias")
         st.write(f"Vencimento: {formatar_data(venc_normal)}")
 
+    # ==============================
+    # CATEGORIAS
+    # ==============================
+
     st.markdown("---")
     st.subheader("Categorias")
     st.multiselect("Selecione categorias", CATEGORIAS)
 
     st.subheader("Pendências")
     st.multiselect("Selecione pendências", PENDENCIAS)
+
+    # ==============================
+    # DIVERGÊNCIAS
+    # ==============================
 
     st.markdown("---")
     st.subheader("Divergências")
@@ -152,23 +172,32 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
             st.text_input(f"Informar NF - {div}")
             st.file_uploader(f"Anexar - {div}")
 
+    # ==============================
     # BARRA FIXA
-    st.markdown(f"""
-    <div class="barra-envio">
+    # ==============================
 
-    <div style="color:white;font-weight:bold;">
-    ENVIAR TAREFA PARA :
-    </div>
+    st.markdown('<div class="barra-envio">', unsafe_allow_html=True)
 
-    <div class="barra-botoes">
+    st.markdown(
+        '<div class="titulo-barra">ENVIAR TAREFA PARA ➜➜</div>',
+        unsafe_allow_html=True
+    )
 
-    <button onclick="window.parent.postMessage({{type:'streamlit:setComponentValue',value:'expedicao'}},'*')">Expedição</button>
-    <button onclick="window.parent.postMessage({{type:'streamlit:setComponentValue',value:'compras'}},'*')">Compras</button>
-    <button onclick="window.parent.postMessage({{type:'streamlit:setComponentValue',value:'cadastro'}},'*')">Cadastro</button>
-    <button onclick="window.parent.postMessage({{type:'streamlit:setComponentValue',value:'prevencao'}},'*')">Prevenção</button>
-    <button onclick="window.parent.postMessage({{type:'streamlit:setComponentValue',value:'uso'}},'*')">Uso e Consumo</button>
+    col1, col2, col3, col4, col5 = st.columns(5)
 
-    </div>
+    with col1:
+        st.button("Expedição", use_container_width=True)
 
-    </div>
-    """, unsafe_allow_html=True)
+    with col2:
+        st.button("Compras", use_container_width=True)
+
+    with col3:
+        st.button("Cadastro", use_container_width=True)
+
+    with col4:
+        st.button("Prevenção", use_container_width=True)
+
+    with col5:
+        st.button("Uso e Consumo", use_container_width=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)
