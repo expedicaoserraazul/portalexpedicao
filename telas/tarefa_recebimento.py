@@ -1,106 +1,174 @@
 import streamlit as st
+from datetime import datetime, timedelta
+from dal.manager import load
 
-st.set_page_config(layout="wide")
+CATEGORIAS = [
+    "Açougue","Bebidas","Cadastro","Commodities","Hortifruti","Hplu",
+    "Mercearia salgada","Mercearias doce","Padaria","Perecíveis","Uso e consumo"
+]
 
-# Cor da barra inferior
-cor_barra = "#f0f2f6"
+PENDENCIAS = [
+    "Cadastro","Condições de pagamento","Custo","Nota 100% sem pedido",
+    "Nota devolvida","Quantidade acima","Sem pedido","Tributação"
+]
 
-# --- CSS ---
-st.markdown(f"""
-<style>
+DIVERGENCIAS = [
+    "DIVERGÊNCIA DE RELACIONAMENTO",
+    "DIVERGÊNCIA DE ITEM FORA DO MIX DA LOJA",
+    "DIVERGÊNCIA DE ITEM SEM PEDIDO",
+    "DIVERGÊNCIA DE CUSTO",
+    "DIVERGÊNCIA DE QUANTIDADE ACIMA DO PEDIDO",
+    "DIVERGÊNCIA DE CONDIÇÃO PAGAMENTO DA NOTA X COND. NEGOCIADA NO PEDIDO",
+    "DIVERGÊNCIA DE PRAZO DE PAGAMENTO X DATA DE EMISSÃO DA NOTA",
+    "DIVERGÊNCIA ABAIXO DA CONDIÇÃO PAGAMENTO AUTORIZADO PELA CONTROLADORIA",
+    "DIVERGÊNCIA DE NOTA COM PEDIDO BLOQUEADO",
+    "DIVERGÊNCIA DE NOTA COM PEDIDO SEM SALDO",
+    "DIVERGÊNCIA DE NOTA COM PEDIDO EXPIRADO",
+    "DIVERGÊNCIA DE NOTA 100% SEM PEDIDO",
+    "DIVERGÊNCIA DE ITEM BONIFICADO SEM PEDIDO",
+    "DIVERGÊNCIA DE NOTA DE BONIFICAÇÃO 100% SEM PEDIDO"
+]
 
-/* Espaço no final da página para não cobrir conteúdo */
-.block-container {{
-    padding-bottom:120px;
-}}
+def calcular_vencimento(dias):
+    return datetime.now().date() + timedelta(days=int(dias))
 
-/* Barra fixa inferior */
-.barra-envio {{
-    position:fixed;
-    bottom:0;
-    left:0;
-    width:100%;
-    background:{cor_barra};
-    padding:15px 20px;
-    z-index:9999;
-    box-shadow:0 -3px 10px rgba(0,0,0,0.15);
-}}
-
-/* Container interno da barra */
-.barra-conteudo {{
-    max-width:1200px;
-    margin:auto;
-    display:flex;
-    align-items:center;
-    gap:10px;
-}}
-
-/* Texto da barra */
-.barra-texto {{
-    font-weight:600;
-    font-size:15px;
-    color:#333;
-}}
-
-/* Botões */
-.barra-botoes {{
-    display:flex;
-    gap:10px;
-    flex:1;
-}}
-
-.barra-botoes button {{
-    flex:1;
-    padding:10px;
-    border-radius:8px;
-    border:none;
-    background:#1f2937;
-    color:white;
-    font-weight:bold;
-    cursor:pointer;
-}}
-
-.barra-botoes button:hover {{
-    background:#374151;
-}}
-
-</style>
-""", unsafe_allow_html=True)
+def formatar_data(data_obj):
+    if not data_obj:
+        return "-"
+    if isinstance(data_obj, str):
+        try:
+            data_obj = datetime.fromisoformat(data_obj).date()
+        except:
+            return data_obj
+    return data_obj.strftime("%d/%m/%y")
 
 
-# --- SIDEBAR ---
-st.sidebar.title("Menu")
-st.sidebar.write("Exemplo de menu lateral")
-st.sidebar.button("Opção 1")
-st.sidebar.button("Opção 2")
+def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
+    st.title("AUTORIZAR RECEBIMENTO DE MERCADORIAS")
 
-# --- CONTEÚDO PRINCIPAL ---
-st.title("Sistema de Tarefas")
+    cores_setor = {
+        "expedição": "#1f77b4",
+        "compras": "#ff7f0e",
+        "cadastro": "#2ca02c",
+        "prevenção": "#d62728",
+        "uso e consumo": "#9467bd",
+        "admin": "#0d6efd"
+    }
 
-st.write("Conteúdo da página...")
-st.write("Role a página para testar a barra fixa.")
+    cor_barra = cores_setor.get(usuario.lower(), "#111111")
 
-for i in range(30):
-    st.write("Linha de exemplo", i)
+    # CSS
+    st.markdown(f"""
+    <style>
 
+    .block-container {{
+        padding-bottom:120px;
+    }}
 
-# --- BARRA FIXA INFERIOR ---
-st.markdown(f"""
-<div class="barra-envio">
-    <div class="barra-conteudo">
+    .barra-envio {{
+        position:fixed;
+        bottom:0;
+        left:260px;
+        right:0;
+        background:{cor_barra};
+        padding:18px;
+        z-index:9999;
+        box-shadow:0 -4px 15px rgba(0,0,0,0.4);
+    }}
 
-        <div class="barra-texto">
-        Enviar tarefa para:
-        </div>
+    .barra-botoes {{
+        display:flex;
+        gap:10px;
+        margin-top:10px;
+    }}
 
-        <div class="barra-botoes">
-            <button>Fiscal</button>
-            <button>Financeiro</button>
-            <button>Compras</button>
-            <button>TI</button>
-        </div>
+    .barra-botoes button {{
+        flex:1;
+        padding:10px;
+        border-radius:8px;
+        border:none;
+        background:#111;
+        color:white;
+        font-weight:bold;
+        cursor:pointer;
+    }}
+
+    .barra-botoes button:hover {{
+        background:#333;
+    }}
+
+    </style>
+    """, unsafe_allow_html=True)
+
+    fornecedores_db = load("fornecedores") or {}
+
+    st.markdown(f"**Usuário:** {usuario}")
+    st.markdown(f"**Loja:** {loja}")
+    st.markdown("---")
+
+    fornecedores_nomes = list(fornecedores_db.keys())
+
+    selecionados = st.multiselect(
+        "Fornecedor",
+        fornecedores_nomes + ["Outros"]
+    )
+
+    if "Outros" in selecionados:
+        st.text_input("Nome fornecedor (Outros)")
+
+    st.text_input("Notas (separadas por vírgula)")
+
+    for nome in selecionados:
+
+        st.markdown("---")
+
+        if nome == "Outros":
+            st.subheader("Fornecedor (Outros)")
+            continue
+
+        dados = fornecedores_db.get(nome, {})
+        razao_social = dados.get("razao_social") or nome
+        prazo = dados.get("condicao_pagamento", 0)
+
+        venc_normal = calcular_vencimento(prazo)
+
+        st.subheader(razao_social)
+        st.write(f"Prazo: {prazo} dias")
+        st.write(f"Vencimento: {formatar_data(venc_normal)}")
+
+    st.markdown("---")
+    st.subheader("Categorias")
+    st.multiselect("Selecione categorias", CATEGORIAS)
+
+    st.subheader("Pendências")
+    st.multiselect("Selecione pendências", PENDENCIAS)
+
+    st.markdown("---")
+    st.subheader("Divergências")
+
+    for div in DIVERGENCIAS:
+        if st.checkbox(div):
+            st.text_input(f"Informar NF - {div}")
+            st.file_uploader(f"Anexar - {div}")
+
+    # BARRA FIXA
+    st.markdown(f"""
+    <div class="barra-envio">
+
+    <div style="color:white;font-weight:bold;">
+    ENVIAR TAREFA PARA :
+    </div>
+
+    <div class="barra-botoes">
+
+    <button onclick="window.parent.postMessage({{type:'streamlit:setComponentValue',value:'expedicao'}},'*')">Expedição</button>
+    <button onclick="window.parent.postMessage({{type:'streamlit:setComponentValue',value:'compras'}},'*')">Compras</button>
+    <button onclick="window.parent.postMessage({{type:'streamlit:setComponentValue',value:'cadastro'}},'*')">Cadastro</button>
+    <button onclick="window.parent.postMessage({{type:'streamlit:setComponentValue',value:'prevencao'}},'*')">Prevenção</button>
+    <button onclick="window.parent.postMessage({{type:'streamlit:setComponentValue',value:'uso'}},'*')">Uso e Consumo</button>
 
     </div>
-</div>
-""", unsafe_allow_html=True)
+
+    </div>
+    """, unsafe_allow_html=True)
