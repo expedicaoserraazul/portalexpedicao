@@ -2,10 +2,6 @@ import streamlit as st
 from datetime import datetime, timedelta
 from dal.manager import load
 
-# ==============================
-# LISTAS
-# ==============================
-
 CATEGORIAS = [
     "Açougue","Bebidas","Cadastro","Commodities","Hortifruti","Hplu",
     "Mercearia salgada","Mercearias doce","Padaria","Perecíveis","Uso e consumo"
@@ -33,10 +29,6 @@ DIVERGENCIAS = [
     "DIVERGÊNCIA DE NOTA DE BONIFICAÇÃO 100% SEM PEDIDO"
 ]
 
-# ==============================
-# FUNÇÕES
-# ==============================
-
 def calcular_vencimento(dias):
     return datetime.now().date() + timedelta(days=int(dias))
 
@@ -51,18 +43,11 @@ def formatar_data(data_obj):
     return data_obj.strftime("%d/%m/%y")
 
 
-# ==============================
-# TELA
-# ==============================
-
 def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
     st.title("AUTORIZAR RECEBIMENTO DE MERCADORIAS")
 
-    # ==============================
     # CORES POR SETOR
-    # ==============================
-
     cores_setor = {
         "expedição": "#1f77b4",
         "compras": "#ff7f0e",
@@ -74,29 +59,23 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
     cor_barra = cores_setor.get(usuario.lower(), "#111111")
 
-    # ==============================
     # CSS DA BARRA FIXA
-    # ==============================
-
     st.markdown(f"""
     <style>
 
-    /* espaço no final da página */
     .block-container {{
         padding-bottom: 160px;
     }}
 
-    /* barra fixa */
     .barra-envio {{
         position: fixed;
         bottom: 0;
-        left: 260px;   /* espaço do menu lateral */
+        left: 260px;
         right: 0;
         background-color: {cor_barra};
-        padding: 18px 35px;
-        border-top: 3px solid red;
+        padding: 18px 30px;
         z-index: 9999;
-        box-shadow: 0 -4px 15px rgba(0,0,0,0.5);
+        box-shadow: 0 -4px 15px rgba(0,0,0,0.4);
     }}
 
     .titulo-barra {{
@@ -115,10 +94,7 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     st.markdown(f"**Loja:** {loja}")
     st.markdown("---")
 
-    # ==============================
     # FORNECEDORES
-    # ==============================
-
     fornecedores_nomes = list(fornecedores_db.keys())
 
     selecionados = st.multiselect(
@@ -149,10 +125,7 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
         st.write(f"Prazo: {prazo} dias")
         st.write(f"Vencimento: {formatar_data(venc_normal)}")
 
-    # ==============================
     # CATEGORIAS
-    # ==============================
-
     st.markdown("---")
     st.subheader("Categorias")
     st.multiselect("Selecione categorias", CATEGORIAS)
@@ -160,10 +133,7 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     st.subheader("Pendências")
     st.multiselect("Selecione pendências", PENDENCIAS)
 
-    # ==============================
     # DIVERGÊNCIAS
-    # ==============================
-
     st.markdown("---")
     st.subheader("Divergências")
 
@@ -172,14 +142,11 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
             st.text_input(f"Informar NF - {div}")
             st.file_uploader(f"Anexar - {div}")
 
-    # ==============================
     # BARRA FIXA
-    # ==============================
-
     st.markdown('<div class="barra-envio">', unsafe_allow_html=True)
 
     st.markdown(
-        '<div class="titulo-barra">ENVIAR TAREFA PARA ➜➜</div>',
+        '<div class="titulo-barra">ENVIAR TAREFA PARA :</div>',
         unsafe_allow_html=True
     )
 
@@ -200,4 +167,4 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     with col5:
         st.button("Uso e Consumo", use_container_width=True)
 
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
