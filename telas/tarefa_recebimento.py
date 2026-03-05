@@ -63,7 +63,7 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     <style>
 
     .block-container {{
-        padding-bottom:200px;
+        padding-bottom:120px;
     }}
 
     .barra-envio {{
