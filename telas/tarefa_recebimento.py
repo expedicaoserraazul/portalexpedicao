@@ -29,8 +29,10 @@ DIVERGENCIAS = [
     "DIVERGÊNCIA DE NOTA DE BONIFICAÇÃO 100% SEM PEDIDO"
 ]
 
+
 def calcular_vencimento(dias):
     return datetime.now().date() + timedelta(days=int(dias))
+
 
 def formatar_data(data_obj):
     if not data_obj:
@@ -47,7 +49,6 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
     st.title("AUTORIZAR RECEBIMENTO DE MERCADORIAS")
 
-    # CORES POR SETOR
     cores_setor = {
         "expedição": "#1f77b4",
         "compras": "#ff7f0e",
@@ -59,7 +60,7 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
     cor_barra = cores_setor.get(usuario.lower(), "#111111")
 
-    # CSS BARRA FIXA
+    # CSS
     st.markdown(f"""
     <style>
 
@@ -109,10 +110,7 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
     st.markdown("---")
 
-    # =========================
     # FORNECEDOR
-    # =========================
-
     fornecedores_nomes = list(fornecedores_db.keys())
 
     selecionados = st.multiselect(
@@ -123,29 +121,20 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     if "Outros" in selecionados:
         st.text_input("Nome fornecedor (Outros)")
 
-    # =========================
     # NOTAS
-    # =========================
-
     notas_input = st.text_input("Notas (separadas por barra '/')")
 
     if notas_input:
         lista_notas = [n.strip() for n in notas_input.split("/") if n.strip()]
 
-    # =========================
     # ANEXAR NOTAS
-    # =========================
-
     st.file_uploader(
         "Anexar Notas para Autorizar Recebimento",
         type=["pdf","xml","jpg","png"],
         accept_multiple_files=True
     )
 
-    # =========================
     # FORNECEDORES SELECIONADOS
-    # =========================
-
     for nome in selecionados:
 
         st.markdown("---")
@@ -164,33 +153,40 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
         st.write(f"Prazo: {prazo} dias")
         st.write(f"Vencimento: {formatar_data(venc_normal)}")
 
-    # =========================
     # CATEGORIAS
+    st.markdown("---")
+    st.subheader("Categorias")
+    st.multiselect("Selecione categorias", CATEGORIAS)
+
+    # PENDÊNCIAS
+    st.subheader("Pendências")
+    st.multiselect("Selecione pendências", PENDENCIAS)
+
+    # =========================
+    # MENSAGENS (RESTAURADO)
     # =========================
 
     st.markdown("---")
-    st.subheader("Categorias")
+    st.subheader("Mensagens")
 
-    st.multiselect(
-        "Selecione categorias",
-        CATEGORIAS
-    )
+    if "mensagens" not in st.session_state:
+        st.session_state.mensagens = []
 
-    # =========================
-    # PENDÊNCIAS
-    # =========================
+    nova_msg = st.text_area("Escrever mensagem")
 
-    st.subheader("Pendências")
+    if st.button("Adicionar Mensagem"):
+        if nova_msg:
+            st.session_state.mensagens.append({
+                "usuario": usuario,
+                "data": datetime.now().strftime("%d/%m/%Y %H:%M"),
+                "texto": nova_msg
+            })
+            st.rerun()
 
-    st.multiselect(
-        "Selecione pendências",
-        PENDENCIAS
-    )
+    for msg in st.session_state.mensagens:
+        st.write(f"[{msg['data']}] {msg['usuario']}: {msg['texto']}")
 
-    # =========================
     # DIVERGÊNCIAS
-    # =========================
-
     st.markdown("---")
     st.subheader("Divergências")
 
@@ -199,10 +195,7 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
             st.text_input(f"Informar NF - {div}")
             st.file_uploader(f"Anexar - {div}")
 
-    # =========================
-    # BARRA FIXA INFERIOR
-    # =========================
-
+    # BARRA FIXA
     st.markdown(f"""
     <div class="barra-envio">
 
