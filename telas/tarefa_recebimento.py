@@ -62,43 +62,39 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     cor_barra = cores_setor.get(usuario.lower(), "#111111")
 
     # ==============================
-    # 🔥 CSS DA BARRA FIXA
+    # 🔥 CSS FIXO REAL
     # ==============================
 
     st.markdown(f"""
     <style>
-    .barra-fixa {{
+
+    .barra-inferior {{
         position: fixed;
         bottom: 0;
         left: 0;
         width: 100%;
-        background-color: {cor_barra};
-        padding: 15px 25px;
+        background: {cor_barra};
+        padding: 15px;
         display: flex;
-        align-items: center;
-        justify-content: space-between;
+        justify-content: space-around;
         z-index: 999999;
-        box-shadow: 0 -4px 15px rgba(0,0,0,0.5);
+        box-shadow: 0 -4px 15px rgba(0,0,0,0.4);
     }}
 
-    .texto-envio {{
-        color: white;
+    .barra-inferior button {{
+        background-color: white;
+        color: black;
+        padding: 10px 15px;
+        border-radius: 8px;
+        border: none;
         font-weight: bold;
-        font-size: 16px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
+        cursor: pointer;
     }}
 
-    .seta-vermelha {{
-        color: red;
-        font-size: 20px;
-        font-weight: bold;
+    .main {{
+        padding-bottom: 120px;
     }}
 
-    section.main > div {{
-        padding-bottom: 140px;
-    }}
     </style>
     """, unsafe_allow_html=True)
 
@@ -109,7 +105,7 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     st.markdown("---")
 
     # ==============================
-    # BLOCO FORNECEDORES
+    # BLOCO 1
     # ==============================
 
     fornecedores_nomes = list(fornecedores_db.keys())
@@ -134,12 +130,13 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
             continue
 
         dados = fornecedores_db.get(nome, {})
-        razao_social = dados.get("razao_social") or nome
-        prazo = dados.get("condicao_pagamento", 0)
 
+        razao_social = dados.get("razao_social") or nome
+        st.subheader(razao_social)
+
+        prazo = dados.get("condicao_pagamento", 0)
         venc_normal = calcular_vencimento(prazo)
 
-        st.subheader(razao_social)
         st.write(f"Prazo: {prazo} dias")
         st.write(f"Vencimento: {formatar_data(venc_normal)}")
 
@@ -166,37 +163,22 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
             st.text_input(f"Informar NF - {div}")
             st.file_uploader(f"Anexar - {div}")
 
-    # Espaço para scroll
-    st.markdown("<br><br><br><br><br>", unsafe_allow_html=True)
-
     # ==============================
-    # 🔥 BARRA FIXA COM BOTÕES
+    # ESPAÇO RESERVA SCROLL
     # ==============================
 
-    st.markdown('<div class="barra-fixa">', unsafe_allow_html=True)
+    st.markdown("<br><br><br><br><br><br>", unsafe_allow_html=True)
 
-    st.markdown("""
-        <div class="texto-envio">
-            ENVIAR TAREFA PARA
-            <span class="seta-vermelha">➜➜</span>
-        </div>
+    # ==============================
+    # 🔥 BARRA FIXA FUNCIONAL
+    # ==============================
+
+    st.markdown(f"""
+    <div class="barra-inferior">
+        <button>Expedição</button>
+        <button>Compras</button>
+        <button>Cadastro</button>
+        <button>Prevenção</button>
+        <button>Uso e Consumo</button>
+    </div>
     """, unsafe_allow_html=True)
-
-    col1, col2, col3, col4, col5 = st.columns(5)
-
-    with col1:
-        st.button("Expedição", use_container_width=True)
-
-    with col2:
-        st.button("Compras", use_container_width=True)
-
-    with col3:
-        st.button("Cadastro", use_container_width=True)
-
-    with col4:
-        st.button("Prevenção", use_container_width=True)
-
-    with col5:
-        st.button("Uso e Consumo", use_container_width=True)
-
-    st.markdown("</div>", unsafe_allow_html=True)
