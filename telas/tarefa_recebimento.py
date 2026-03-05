@@ -1,184 +1,84 @@
 import streamlit as st
-from datetime import datetime, timedelta
-from dal.manager import load, save
+from auth.login import login_screen
+from cadastros.fornecedores import tela_fornecedores
+from admin.painel import painel_admin
+from security.authorization import modulos_permitidos
+from telas.tarefa_recebimento import tela_tarefa
 
-CATEGORIAS = [
-    "Açougue","Bebidas","Cadastro","Commodities","Hortifruti","Hplu",
-    "Mercearia salgada","Mercearias doce","Padaria","Perecíveis","Uso e consumo"
-]
+# 🔥 LAYOUT CORRETO
+st.set_page_config(page_title="Portal Expedição", layout="wide")
 
-PENDENCIAS = [
-    "Cadastro","Condições de pagamento","Custo","Nota 100% sem pedido",
-    "Nota devolvida","Quantidade acima","Sem pedido","Tributação"
-]
+# ---------- SESSION INIT ----------
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
 
-DIVERGENCIAS = [
-    "DIVERGÊNCIA DE RELACIONAMENTO",
-    "DIVERGÊNCIA DE ITEM FORA DO MIX DA LOJA",
-    "DIVERGÊNCIA DE ITEM SEM PEDIDO",
-    "DIVERGÊNCIA DE CUSTO",
-    "DIVERGÊNCIA DE QUANTIDADE ACIMA DO PEDIDO",
-    "DIVERGÊNCIA DE CONDIÇÃO PAGAMENTO DA NOTA X COND. NEGOCIADA NO PEDIDO",
-    "DIVERGÊNCIA DE PRAZO DE PAGAMENTO X DATA DE EMISSÃO DA NOTA",
-    "DIVERGÊNCIA ABAIXO DA CONDIÇÃO PAGAMENTO AUTORIZADO PELA CONTROLADORIA",
-    "DIVERGÊNCIA DE NOTA COM PEDIDO BLOQUEADO",
-    "DIVERGÊNCIA DE NOTA COM PEDIDO SEM SALDO",
-    "DIVERGÊNCIA DE NOTA COM PEDIDO EXPIRADO",
-    "DIVERGÊNCIA DE NOTA 100% SEM PEDIDO",
-    "DIVERGÊNCIA DE ITEM BONIFICADO SEM PEDIDO",
-    "DIVERGÊNCIA DE NOTA DE BONIFICAÇÃO 100% SEM PEDIDO"
-]
+# ---------- LOGIN ----------
+if not st.session_state.authenticated:
+    login_screen()
 
-def calcular_vencimento(dias):
-    return datetime.now().date() + timedelta(days=int(dias))
+# ---------- SISTEMA ----------
+else:
+    st.sidebar.title("📂 Menu")
 
-def formatar_data(data_obj):
-    if not data_obj:
-        return "-"
-    if isinstance(data_obj, str):
-        try:
-            data_obj = datetime.fromisoformat(data_obj).date()
-        except:
-            return data_obj
-    return data_obj.strftime("%d/%m/%y")
+    st.sidebar.write(f"👤 {st.session_state.user['name']}")
+    st.sidebar.write(f"🏷️ {st.session_state.user['cargo']}")
+    st.sidebar.write(f"🏢 {st.session_state.user['setor']}")
+    st.sidebar.write(f"🔐 Perfil: {st.session_state.user['role']}")
 
+    role = st.session_state.user["role"]
 
-def tela_tarefa(usuario="prevenção", loja="Loja 01"):
+    # ---------- RBAC ----------
+    modulos = modulos_permitidos(role)
 
-    st.title("AUTORIZAR RECEBIMENTO DE MERCADORIAS")
-
-    # ==============================
-    # 🎨 COR DINÂMICA POR SETOR
-    # ==============================
-
-    cores_setor = {
-        "expedição": "#1f77b4",
-        "compras": "#ff7f0e",
-        "cadastro": "#2ca02c",
-        "prevenção": "#d62728",
-        "uso e consumo": "#9467bd"
+    menu_labels = {
+        "home": "Home",
+        "admin": "Administração",
+        "fornecedores": "Fornecedores",
+        "tarefa_recebimento": "Autorizar Recebimento",
+        "modulos": "Módulos",
+        "configuracoes": "Configurações"
     }
 
-    cor_barra = cores_setor.get(usuario.lower(), "#111111")
+    # Filtra apenas módulos permitidos
+    menu_opcoes = [menu_labels[m] for m in modulos if m in menu_labels]
 
-    # ==============================
-    # 🔥 CSS FIXO REAL
-    # ==============================
-
-    st.markdown(f"""
-    <style>
-
-    .barra-inferior {{
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background: {cor_barra};
-        padding: 15px;
-        display: flex;
-        justify-content: space-around;
-        z-index: 999999;
-        box-shadow: 0 -4px 15px rgba(0,0,0,0.4);
-    }}
-
-    .barra-inferior button {{
-        background-color: white;
-        color: black;
-        padding: 10px 15px;
-        border-radius: 8px;
-        border: none;
-        font-weight: bold;
-        cursor: pointer;
-    }}
-
-    .main {{
-        padding-bottom: 120px;
-    }}
-
-    </style>
-    """, unsafe_allow_html=True)
-
-    fornecedores_db = load("fornecedores") or {}
-
-    st.markdown(f"**Usuário:** {usuario}")
-    st.markdown(f"**Loja:** {loja}")
-    st.markdown("---")
-
-    # ==============================
-    # BLOCO 1
-    # ==============================
-
-    fornecedores_nomes = list(fornecedores_db.keys())
-
-    selecionados = st.multiselect(
-        "Fornecedor",
-        fornecedores_nomes + ["Outros"]
+    menu = st.sidebar.radio(
+        "Navegação",
+        menu_opcoes
     )
 
-    fornecedor_outro = None
-    if "Outros" in selecionados:
-        fornecedor_outro = st.text_input("Nome fornecedor (Outros)")
+    # ---------- LOGOUT ----------
+    if st.sidebar.button("🚪 Sair"):
+        for k in list(st.session_state.keys()):
+            del st.session_state[k]
+        st.rerun()
 
-    st.text_input("Notas (separadas por vírgula)")
+    # ---------- MENU ROUTER ----------
+    label_to_key = {v: k for k, v in menu_labels.items()}
+    menu_key = label_to_key[menu]
 
-    for nome in selecionados:
+    # ---------- TELAS ----------
+    if menu_key == "home":
+        st.title("🏠 Home")
+        st.success("Sistema autenticado")
 
-        st.markdown("---")
+    elif menu_key == "admin":
+        painel_admin()
 
-        if nome == "Outros":
-            st.subheader(fornecedor_outro if fornecedor_outro else "Fornecedor (Outros)")
-            continue
+    elif menu_key == "fornecedores":
+        tela_fornecedores()
 
-        dados = fornecedores_db.get(nome, {})
+    elif menu_key == "tarefa_recebimento":
+        # 🔥 ALTERAÇÃO 2 APLICADA AQUI
+        tela_tarefa(
+            usuario=st.session_state.user["setor"],  # AGORA PASSA O SETOR
+            loja=st.session_state.user.get("loja", "Loja não definida")
+        )
 
-        razao_social = dados.get("razao_social") or nome
-        st.subheader(razao_social)
+    elif menu_key == "modulos":
+        st.title("🧩 Módulos do Sistema")
+        st.info("Gestão de módulos do sistema")
 
-        prazo = dados.get("condicao_pagamento", 0)
-        venc_normal = calcular_vencimento(prazo)
-
-        st.write(f"Prazo: {prazo} dias")
-        st.write(f"Vencimento: {formatar_data(venc_normal)}")
-
-    # ==============================
-    # CATEGORIAS
-    # ==============================
-
-    st.markdown("---")
-    st.subheader("Categorias")
-    st.multiselect("Selecione categorias", CATEGORIAS)
-
-    st.subheader("Pendências")
-    st.multiselect("Selecione pendências", PENDENCIAS)
-
-    # ==============================
-    # DIVERGÊNCIAS
-    # ==============================
-
-    st.markdown("---")
-    st.subheader("Divergências")
-
-    for div in DIVERGENCIAS:
-        if st.checkbox(div):
-            st.text_input(f"Informar NF - {div}")
-            st.file_uploader(f"Anexar - {div}")
-
-    # ==============================
-    # ESPAÇO RESERVA SCROLL
-    # ==============================
-
-    st.markdown("<br><br><br><br><br><br>", unsafe_allow_html=True)
-
-    # ==============================
-    # 🔥 BARRA FIXA FUNCIONAL
-    # ==============================
-
-    st.markdown(f"""
-    <div class="barra-inferior">
-        <button>Expedição</button>
-        <button>Compras</button>
-        <button>Cadastro</button>
-        <button>Prevenção</button>
-        <button>Uso e Consumo</button>
-    </div>
-    """, unsafe_allow_html=True)
+    elif menu_key == "configuracoes":
+        st.title("⚙️ Configurações do Sistema")
+        st.info("Configurações gerais da plataforma")
