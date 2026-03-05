@@ -69,12 +69,12 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     .barra-envio {{
         position:fixed;
         bottom:0;
-        left:290px;
+        left:260px;
         right:0;
         background:{cor_barra};
         padding:18px;
         z-index:9999;
-        box-shadow:0 -4px 15px rgba(0,0,0,0.4);
+        box-shadow:0 -4px 20px rgba(0,0,0,0.4);
     }}
 
     .barra-botoes {{
