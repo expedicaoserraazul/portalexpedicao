@@ -60,7 +60,6 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
     cor_barra = cores_setor.get(usuario.lower(), "#111111")
 
-    # CSS
     st.markdown(f"""
     <style>
 
@@ -110,10 +109,7 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
     st.markdown("---")
 
-    # =========================
     # FORNECEDOR
-    # =========================
-
     fornecedores_nomes = list(fornecedores_db.keys())
 
     selecionados = st.multiselect(
@@ -124,29 +120,20 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     if "Outros" in selecionados:
         st.text_input("Nome fornecedor (Outros)")
 
-    # =========================
     # NOTAS
-    # =========================
-
     notas_input = st.text_input("Notas (separadas por barra '/')")
 
     if notas_input:
         lista_notas = [n.strip() for n in notas_input.split("/") if n.strip()]
 
-    # =========================
     # ANEXAR NOTAS
-    # =========================
-
     st.file_uploader(
         "Anexar Notas para Autorizar Recebimento",
         type=["pdf","xml","jpg","png"],
         accept_multiple_files=True
     )
 
-    # =========================
     # FORNECEDORES SELECIONADOS
-    # =========================
-
     for nome in selecionados:
 
         st.markdown("---")
@@ -165,18 +152,12 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
         st.write(f"Prazo: {prazo} dias")
         st.write(f"Vencimento: {formatar_data(venc_normal)}")
 
-    # =========================
     # CATEGORIAS
-    # =========================
-
     st.markdown("---")
     st.subheader("Categorias")
     st.multiselect("Selecione categorias", CATEGORIAS)
 
-    # =========================
     # PENDÊNCIAS
-    # =========================
-
     st.subheader("Pendências")
     st.multiselect("Selecione pendências", PENDENCIAS)
 
@@ -193,29 +174,33 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     if "campo_mensagem" not in st.session_state:
         st.session_state.campo_mensagem = ""
 
-    nova_msg = st.text_area(
+    def adicionar_mensagem():
+
+        texto = st.session_state.campo_mensagem.strip()
+
+        if texto:
+            st.session_state.mensagens.append({
+                "usuario": usuario,
+                "data": datetime.now().strftime("%d/%m/%Y %H:%M"),
+                "texto": texto
+            })
+
+            st.session_state.campo_mensagem = ""
+
+    st.text_area(
         "Escrever mensagem",
         key="campo_mensagem"
     )
 
-    if st.button("Adicionar Mensagem"):
-        if nova_msg.strip():
-            st.session_state.mensagens.append({
-                "usuario": usuario,
-                "data": datetime.now().strftime("%d/%m/%Y %H:%M"),
-                "texto": nova_msg
-            })
-
-            st.session_state.campo_mensagem = ""
-            st.rerun()
+    st.button(
+        "Adicionar Mensagem",
+        on_click=adicionar_mensagem
+    )
 
     for msg in st.session_state.mensagens:
         st.write(f"[{msg['data']}] {msg['usuario']}: {msg['texto']}")
 
-    # =========================
     # DIVERGÊNCIAS
-    # =========================
-
     st.markdown("---")
     st.subheader("Divergências")
 
@@ -224,10 +209,7 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
             st.text_input(f"Informar NF - {div}")
             st.file_uploader(f"Anexar - {div}")
 
-    # =========================
-    # ANEXAR DEVOLUÇÃO (RESTAURADO)
-    # =========================
-
+    # ANEXAR DEVOLUÇÃO
     st.markdown("---")
 
     st.file_uploader(
@@ -236,10 +218,7 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
         accept_multiple_files=True
     )
 
-    # =========================
     # BARRA FIXA
-    # =========================
-
     st.markdown(f"""
     <div class="barra-envio">
 
