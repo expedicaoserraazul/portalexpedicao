@@ -47,7 +47,6 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
     st.title("AUTORIZAR RECEBIMENTO DE MERCADORIAS")
 
-    # CORES POR SETOR
     cores_setor = {
         "expedição": "#1f77b4",
         "compras": "#ff7f0e",
@@ -59,30 +58,44 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
     cor_barra = cores_setor.get(usuario.lower(), "#111111")
 
-    # CSS DA BARRA FIXA
+    # CSS
     st.markdown(f"""
     <style>
 
     .block-container {{
-        padding-bottom: 160px;
+        padding-bottom:120px;
     }}
 
     .barra-envio {{
-        position: fixed;
-        bottom: 0;
-        left: 260px;
-        right: 0;
-        background-color: {cor_barra};
-        padding: 18px 30px;
-        z-index: 9999;
-        box-shadow: 0 -4px 15px rgba(0,0,0,0.4);
+        position:fixed;
+        bottom:0;
+        left:260px;
+        right:0;
+        background:{cor_barra};
+        padding:18px;
+        z-index:9999;
+        box-shadow:0 -4px 15px rgba(0,0,0,0.4);
     }}
 
-    .titulo-barra {{
-        color: white;
-        font-weight: bold;
-        margin-bottom: 10px;
-        font-size: 15px;
+    .barra-botoes {{
+        display:flex;
+        gap:10px;
+        margin-top:10px;
+    }}
+
+    .barra-botoes button {{
+        flex:1;
+        padding:10px;
+        border-radius:8px;
+        border:none;
+        background:#111;
+        color:white;
+        font-weight:bold;
+        cursor:pointer;
+    }}
+
+    .barra-botoes button:hover {{
+        background:#333;
     }}
 
     </style>
@@ -94,7 +107,6 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     st.markdown(f"**Loja:** {loja}")
     st.markdown("---")
 
-    # FORNECEDORES
     fornecedores_nomes = list(fornecedores_db.keys())
 
     selecionados = st.multiselect(
@@ -125,7 +137,6 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
         st.write(f"Prazo: {prazo} dias")
         st.write(f"Vencimento: {formatar_data(venc_normal)}")
 
-    # CATEGORIAS
     st.markdown("---")
     st.subheader("Categorias")
     st.multiselect("Selecione categorias", CATEGORIAS)
@@ -133,7 +144,6 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     st.subheader("Pendências")
     st.multiselect("Selecione pendências", PENDENCIAS)
 
-    # DIVERGÊNCIAS
     st.markdown("---")
     st.subheader("Divergências")
 
@@ -143,28 +153,22 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
             st.file_uploader(f"Anexar - {div}")
 
     # BARRA FIXA
-    st.markdown('<div class="barra-envio">', unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class="barra-envio">
 
-    st.markdown(
-        '<div class="titulo-barra">ENVIAR TAREFA PARA :</div>',
-        unsafe_allow_html=True
-    )
+    <div style="color:white;font-weight:bold;">
+    ENVIAR TAREFA PARA :
+    </div>
 
-    col1, col2, col3, col4, col5 = st.columns(5)
+    <div class="barra-botoes">
 
-    with col1:
-        st.button("Expedição", use_container_width=True)
+    <button onclick="window.parent.postMessage({{type:'streamlit:setComponentValue',value:'expedicao'}},'*')">Expedição</button>
+    <button onclick="window.parent.postMessage({{type:'streamlit:setComponentValue',value:'compras'}},'*')">Compras</button>
+    <button onclick="window.parent.postMessage({{type:'streamlit:setComponentValue',value:'cadastro'}},'*')">Cadastro</button>
+    <button onclick="window.parent.postMessage({{type:'streamlit:setComponentValue',value:'prevencao'}},'*')">Prevenção</button>
+    <button onclick="window.parent.postMessage({{type:'streamlit:setComponentValue',value:'uso'}},'*')">Uso e Consumo</button>
 
-    with col2:
-        st.button("Compras", use_container_width=True)
+    </div>
 
-    with col3:
-        st.button("Cadastro", use_container_width=True)
-
-    with col4:
-        st.button("Prevenção", use_container_width=True)
-
-    with col5:
-        st.button("Uso e Consumo", use_container_width=True)
-
-    st.markdown("</div>", unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
