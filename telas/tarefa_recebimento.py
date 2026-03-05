@@ -34,7 +34,7 @@ DIVERGENCIAS = [
 ]
 
 # ==============================
-# FUNÇÕES
+# FUNÇÕES AUXILIARES
 # ==============================
 
 def calcular_vencimento(dias):
@@ -52,7 +52,7 @@ def formatar_data(data_obj):
 
 
 # ==============================
-# TELA
+# TELA PRINCIPAL
 # ==============================
 
 def tela_tarefa(usuario="prevenção", loja="Loja 01"):
@@ -60,50 +60,50 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     st.title("AUTORIZAR RECEBIMENTO DE MERCADORIAS")
 
     # ==============================
-    # CORES POR SETOR
+    # COR DINÂMICA POR SETOR
     # ==============================
 
     cores_setor = {
+        "admin": "#0d6efd",
         "expedição": "#1f77b4",
         "compras": "#ff7f0e",
         "cadastro": "#2ca02c",
         "prevenção": "#d62728",
-        "uso e consumo": "#9467bd",
-        "admin": "#0d6efd"
+        "uso e consumo": "#9467bd"
     }
 
-    cor_barra = cores_setor.get(usuario.lower(), "#111111")
+    usuario_normalizado = usuario.strip().lower()
+    cor_barra = cores_setor.get(usuario_normalizado, "#111111")
 
     # ==============================
-    # CSS DA BARRA FIXA
+    # CSS GLOBAL
     # ==============================
 
     st.markdown(f"""
     <style>
 
-    /* espaço no final da página */
+    /* espaço para não cobrir conteúdo */
     .block-container {{
-        padding-bottom: 160px;
+        padding-bottom: 200px;
     }}
 
-    /* barra fixa */
-    .barra-envio {{
+    /* container da barra fixa */
+    div[data-testid="stVerticalBlock"]:has(.barra-marker) {{
         position: fixed;
         bottom: 0;
-        left: 260px;   /* espaço do menu lateral */
-        right: 0;
+        left: 0;
+        width: 100%;
         background-color: {cor_barra};
-        padding: 18px 35px;
-        border-top: 3px solid red;
-        z-index: 9999;
-        box-shadow: 0 -4px 15px rgba(0,0,0,0.5);
+        padding: 20px 40px 25px 40px;
+        z-index: 999999;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.4);
     }}
 
-    .titulo-barra {{
+    .barra-titulo {{
         color: white;
         font-weight: bold;
         margin-bottom: 10px;
-        font-size: 15px;
+        font-size: 16px;
     }}
 
     </style>
@@ -173,31 +173,28 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
             st.file_uploader(f"Anexar - {div}")
 
     # ==============================
-    # BARRA FIXA
+    # BARRA FIXA REAL
     # ==============================
 
-    st.markdown('<div class="barra-envio">', unsafe_allow_html=True)
+    barra = st.container()
 
-    st.markdown(
-        '<div class="titulo-barra">ENVIAR TAREFA PARA ➜➜</div>',
-        unsafe_allow_html=True
-    )
+    with barra:
+        st.markdown("<div class='barra-marker'></div>", unsafe_allow_html=True)
+        st.markdown("<div class='barra-titulo'>ENVIAR TAREFA PARA :</div>", unsafe_allow_html=True)
 
-    col1, col2, col3, col4, col5 = st.columns(5)
+        col1, col2, col3, col4, col5 = st.columns(5)
 
-    with col1:
-        st.button("Expedição", use_container_width=True)
+        with col1:
+            st.button("Expedição", use_container_width=True)
 
-    with col2:
-        st.button("Compras", use_container_width=True)
+        with col2:
+            st.button("Compras", use_container_width=True)
 
-    with col3:
-        st.button("Cadastro", use_container_width=True)
+        with col3:
+            st.button("Cadastro", use_container_width=True)
 
-    with col4:
-        st.button("Prevenção", use_container_width=True)
+        with col4:
+            st.button("Prevenção", use_container_width=True)
 
-    with col5:
-        st.button("Uso e Consumo", use_container_width=True)
-
-    st.markdown('</div>', unsafe_allow_html=True)
+        with col5:
+            st.button("Uso e Consumo", use_container_width=True)
