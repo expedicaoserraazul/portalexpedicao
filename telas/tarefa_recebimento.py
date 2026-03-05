@@ -69,7 +69,7 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     .barra-envio {{
         position:fixed;
         bottom:0;
-        left:260px;
+        left:290px;
         right:0;
         background:{cor_barra};
         padding:18px;
