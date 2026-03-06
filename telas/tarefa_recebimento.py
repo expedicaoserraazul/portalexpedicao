@@ -250,3 +250,4 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
         </div>
     </div>
     """, unsafe_allow_html=True)
+    
