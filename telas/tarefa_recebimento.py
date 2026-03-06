@@ -29,10 +29,8 @@ DIVERGENCIAS = [
     "DIVERGÊNCIA DE NOTA DE BONIFICAÇÃO 100% SEM PEDIDO"
 ]
 
-
 def calcular_vencimento(dias):
     return datetime.now().date() + timedelta(days=int(dias))
-
 
 def formatar_data(data_obj):
     if not data_obj:
@@ -43,7 +41,6 @@ def formatar_data(data_obj):
         except:
             return data_obj
     return data_obj.strftime("%d/%m/%y")
-
 
 def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
@@ -64,39 +61,44 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     <style>
 
     .block-container {{
-        padding-bottom:140px;
+        padding-bottom:160px;
     }}
 
     .barra-envio {{
-        position:fixed;
-        bottom:0;
-        left:0;
-        right:0;
-        background:{cor_barra};
-        padding:18px;
-        z-index:9999;
-        box-shadow:0 -4px 15px rgba(0,0,0,0.4);
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: {cor_barra};
+        padding: 20px;
+        z-index: 9999;
+        box-shadow: 0 -4px 15px rgba(0,0,0,0.5);
+        transition: all 0.2s ease;
+    }}
+
+    .barra-conteudo {{
+        margin-left: 8cm;
     }}
 
     .barra-botoes {{
-        display:flex;
-        gap:10px;
-        margin-top:10px;
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+        flex-wrap: wrap;
     }}
 
     .barra-botoes button {{
-        flex:1;
-        padding:10px;
-        border-radius:8px;
-        border:none;
-        background:#111;
-        color:white;
-        font-weight:bold;
-        cursor:pointer;
+        padding: 10px 16px;
+        border-radius: 8px;
+        border: none;
+        background: #111;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
     }}
 
     .barra-botoes button:hover {{
-        background:#333;
+        background: #333;
     }}
 
     </style>
@@ -109,7 +111,6 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
     st.markdown("---")
 
-    # FORNECEDOR
     fornecedores_nomes = list(fornecedores_db.keys())
 
     selecionados = st.multiselect(
@@ -120,20 +121,17 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     if "Outros" in selecionados:
         st.text_input("Nome fornecedor (Outros)")
 
-    # NOTAS
     notas_input = st.text_input("Notas (separadas por barra '/')")
 
     if notas_input:
         lista_notas = [n.strip() for n in notas_input.split("/") if n.strip()]
 
-    # ANEXAR NOTAS
     st.file_uploader(
         "Anexar Notas para Autorizar Recebimento",
         type=["pdf","xml","jpg","png"],
         accept_multiple_files=True
     )
 
-    # FORNECEDORES SELECIONADOS
     for nome in selecionados:
 
         st.markdown("---")
@@ -152,18 +150,12 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
         st.write(f"Prazo: {prazo} dias")
         st.write(f"Vencimento: {formatar_data(venc_normal)}")
 
-    # CATEGORIAS
     st.markdown("---")
     st.subheader("Categorias")
     st.multiselect("Selecione categorias", CATEGORIAS)
 
-    # PENDÊNCIAS
     st.subheader("Pendências")
     st.multiselect("Selecione pendências", PENDENCIAS)
-
-    # =========================
-    # MENSAGENS
-    # =========================
 
     st.markdown("---")
     st.subheader("Mensagens")
@@ -200,7 +192,6 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     for msg in st.session_state.mensagens:
         st.write(f"[{msg['data']}] {msg['usuario']}: {msg['texto']}")
 
-    # DIVERGÊNCIAS
     st.markdown("---")
     st.subheader("Divergências")
 
@@ -209,7 +200,6 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
             st.text_input(f"Informar NF - {div}")
             st.file_uploader(f"Anexar - {div}")
 
-    # ANEXAR DEVOLUÇÃO
     st.markdown("---")
 
     st.file_uploader(
@@ -218,23 +208,27 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
         accept_multiple_files=True
     )
 
-    # BARRA FIXA
     st.markdown(f"""
     <div class="barra-envio">
 
-    <div style="color:white;font-weight:bold;">
-    ENVIAR TAREFA PARA :
-    </div>
+        <div class="barra-conteudo">
 
-    <div class="barra-botoes">
+            <div style="color:white;font-weight:bold;">
+            ENVIAR TAREFA PARA:
+            </div>
 
-    <button>Expedição</button>
-    <button>Compras</button>
-    <button>Cadastro</button>
-    <button>Prevenção</button>
-    <button>Uso e Consumo</button>
+            <div class="barra-botoes">
 
-    </div>
+                <button>Expedição</button>
+                <button>Compras</button>
+                <button>Cadastro</button>
+                <button>Prevenção</button>
+                <button>Uso e Consumo</button>
+                <button style="background:#0d6efd;">Finalizar Tarefa</button>
+
+            </div>
+
+        </div>
 
     </div>
     """, unsafe_allow_html=True)
