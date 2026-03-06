@@ -40,13 +40,16 @@ def calcular_vencimento_estendido(dias):
 
 
 def formatar_data(data_obj):
+
     if not data_obj:
         return "-"
+
     if isinstance(data_obj, str):
         try:
             data_obj = datetime.fromisoformat(data_obj).date()
         except:
             return data_obj
+
     return data_obj.strftime("%d/%m/%y")
 
 
@@ -211,9 +214,20 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     st.subheader("Divergências")
 
     for div in DIVERGENCIAS:
+
         if st.checkbox(div):
+
             st.text_input(f"Informar NF - {div}")
-            st.file_uploader(f"Anexar - {div}")
+
+            st.file_uploader(
+                f"Anexar Arquivo - {div}",
+                type=["pdf","xml","jpg","png"],
+                accept_multiple_files=True
+            )
+
+            st.camera_input(
+                f"Colar Print / Capturar Imagem - {div}"
+            )
 
     st.markdown("---")
 
