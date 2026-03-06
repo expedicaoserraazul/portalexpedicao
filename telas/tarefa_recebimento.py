@@ -1,6 +1,9 @@
 import streamlit as st
 from datetime import datetime, timedelta
 from dal.manager import load
+from streamlit_paste_button import paste_image_button
+from PIL import Image
+import io
 
 
 CATEGORIAS = [
