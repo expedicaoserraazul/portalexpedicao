@@ -2,6 +2,7 @@ import streamlit as st
 from datetime import datetime, timedelta
 from dal.manager import load
 
+
 CATEGORIAS = [
     "Açougue","Bebidas","Cadastro","Commodities","Hortifruti","Hplu",
     "Mercearia salgada","Mercearias doce","Padaria","Perecíveis","Uso e consumo"
@@ -29,8 +30,10 @@ DIVERGENCIAS = [
     "DIVERGÊNCIA DE NOTA DE BONIFICAÇÃO 100% SEM PEDIDO"
 ]
 
+
 def calcular_vencimento(dias):
     return datetime.now().date() + timedelta(days=int(dias))
+
 
 def formatar_data(data_obj):
     if not data_obj:
@@ -41,6 +44,7 @@ def formatar_data(data_obj):
         except:
             return data_obj
     return data_obj.strftime("%d/%m/%y")
+
 
 def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
@@ -73,32 +77,12 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
         padding: 20px;
         z-index: 9999;
         box-shadow: 0 -4px 15px rgba(0,0,0,0.5);
-        transition: all 0.2s ease;
     }}
 
     .barra-conteudo {{
         margin-left: 8cm;
-    }}
-
-    .barra-botoes {{
-        display: flex;
-        gap: 10px;
-        margin-top: 10px;
-        flex-wrap: wrap;
-    }}
-
-    .barra-botoes button {{
-        padding: 10px 16px;
-        border-radius: 8px;
-        border: none;
-        background: #111;
-        color: white;
-        font-weight: bold;
-        cursor: pointer;
-    }}
-
-    .barra-botoes button:hover {{
-        background: #333;
+        color:white;
+        font-weight:bold;
     }}
 
     </style>
@@ -208,27 +192,38 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
         accept_multiple_files=True
     )
 
+    # BARRA FIXA
     st.markdown(f"""
     <div class="barra-envio">
-
         <div class="barra-conteudo">
-
-            <div style="color:white;font-weight:bold;">
             ENVIAR TAREFA PARA:
-            </div>
-
-            <div class="barra-botoes">
-
-                <button>Expedição</button>
-                <button>Compras</button>
-                <button>Cadastro</button>
-                <button>Prevenção</button>
-                <button>Uso e Consumo</button>
-                <button style="background:#0d6efd;">Finalizar Tarefa</button>
-
-            </div>
-
         </div>
-
     </div>
     """, unsafe_allow_html=True)
+
+    # BOTÕES FUNCIONAIS
+    col1, col2, col3, col4, col5, col6 = st.columns(6)
+
+    with col1:
+        if st.button("Expedição"):
+            st.success("Tarefa enviada para Expedição")
+
+    with col2:
+        if st.button("Compras"):
+            st.success("Tarefa enviada para Compras")
+
+    with col3:
+        if st.button("Cadastro"):
+            st.success("Tarefa enviada para Cadastro")
+
+    with col4:
+        if st.button("Prevenção"):
+            st.success("Tarefa enviada para Prevenção")
+
+    with col5:
+        if st.button("Uso e Consumo"):
+            st.success("Tarefa enviada para Uso e Consumo")
+
+    with col6:
+        if st.button("Finalizar Tarefa"):
+            st.success("Tarefa Finalizada")
