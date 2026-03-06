@@ -5,3 +5,4 @@ pillow==10.4.0
 python-dateutil==2.9.0
 numpy==1.26.4
 streamlit-option-menu==0.3.13
+streamlit-paste-button==0.1.2
