@@ -65,7 +65,7 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
     <style>
 
     .block-container {{
-        padding-bottom:160px;
+        padding-bottom:180px;
     }}
 
     .barra-envio {{
@@ -74,15 +74,34 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
         left: 0;
         width: 100%;
         background: {cor_barra};
-        padding: 20px;
+        padding: 18px;
         z-index: 9999;
-        box-shadow: 0 -4px 15px rgba(0,0,0,0.5);
+        box-shadow: 0 -4px 10px rgba(0,0,0,0.4);
     }}
 
     .barra-conteudo {{
         margin-left: 8cm;
         color:white;
         font-weight:bold;
+        font-size:16px;
+        display:flex;
+        align-items:center;
+        gap:15px;
+        flex-wrap:wrap;
+    }}
+
+    .botao-barra {{
+        background:white;
+        color:black;
+        border:none;
+        padding:8px 14px;
+        border-radius:6px;
+        cursor:pointer;
+        font-weight:bold;
+    }}
+
+    .botao-barra:hover {{
+        background:#eeeeee;
     }}
 
     </style>
@@ -192,38 +211,17 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
         accept_multiple_files=True
     )
 
-    # BARRA FIXA
+    # BARRA FIXA COM BOTÕES
     st.markdown(f"""
     <div class="barra-envio">
         <div class="barra-conteudo">
             ENVIAR TAREFA PARA:
+            <button class="botao-barra">Expedição</button>
+            <button class="botao-barra">Compras</button>
+            <button class="botao-barra">Cadastro</button>
+            <button class="botao-barra">Prevenção</button>
+            <button class="botao-barra">Uso e Consumo</button>
+            <button class="botao-barra">Finalizar Tarefa</button>
         </div>
     </div>
     """, unsafe_allow_html=True)
-
-    # BOTÕES FUNCIONAIS
-    col1, col2, col3, col4, col5, col6 = st.columns(6)
-
-    with col1:
-        if st.button("Expedição"):
-            st.success("Tarefa enviada para Expedição")
-
-    with col2:
-        if st.button("Compras"):
-            st.success("Tarefa enviada para Compras")
-
-    with col3:
-        if st.button("Cadastro"):
-            st.success("Tarefa enviada para Cadastro")
-
-    with col4:
-        if st.button("Prevenção"):
-            st.success("Tarefa enviada para Prevenção")
-
-    with col5:
-        if st.button("Uso e Consumo"):
-            st.success("Tarefa enviada para Uso e Consumo")
-
-    with col6:
-        if st.button("Finalizar Tarefa"):
-            st.success("Tarefa Finalizada")
