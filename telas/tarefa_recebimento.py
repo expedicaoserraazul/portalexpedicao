@@ -35,6 +35,10 @@ def calcular_vencimento(dias):
     return datetime.now().date() + timedelta(days=int(dias))
 
 
+def calcular_vencimento_estendido(dias):
+    return datetime.now().date() + timedelta(days=int(dias) + 7)
+
+
 def formatar_data(data_obj):
     if not data_obj:
         return "-"
@@ -148,10 +152,18 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
         prazo = dados.get("condicao_pagamento", 0)
 
         venc_normal = calcular_vencimento(prazo)
+        venc_estendido = calcular_vencimento_estendido(prazo)
 
         st.subheader(razao_social)
         st.write(f"Prazo: {prazo} dias")
-        st.write(f"Vencimento: {formatar_data(venc_normal)}")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.info(f"Vencimento Normal: {formatar_data(venc_normal)}")
+
+        with col2:
+            st.warning(f"Vencimento Estendido: {formatar_data(venc_estendido)}")
 
     st.markdown("---")
     st.subheader("Categorias")
@@ -211,7 +223,6 @@ def tela_tarefa(usuario="prevenção", loja="Loja 01"):
         accept_multiple_files=True
     )
 
-    # BARRA FIXA COM BOTÕES
     st.markdown(f"""
     <div class="barra-envio">
         <div class="barra-conteudo">
