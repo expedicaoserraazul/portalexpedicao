@@ -1,105 +1,240 @@
 import streamlit as st
+from datetime import datetime, timedelta
+from dal.manager import load
 
-# BARRA FIXA INFERIOR
-st.markdown("""
-<style>
+CATEGORIAS = [
+    "Açougue","Bebidas","Cadastro","Commodities","Hortifruti","Hplu",
+    "Mercearia salgada","Mercearias doce","Padaria","Perecíveis","Uso e consumo"
+]
 
-.barra-envio {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background-color: #ffffff;
-    border-top: 1px solid #ddd;
-    padding: 12px 0;
-    z-index: 9999;
-}
+PENDENCIAS = [
+    "Cadastro","Condições de pagamento","Custo","Nota 100% sem pedido",
+    "Nota devolvida","Quantidade acima","Sem pedido","Tributação"
+]
 
-.barra-conteudo {
-    margin-left: 8cm; /* MOVE OS BOTÕES 8CM PARA DIREITA */
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
+DIVERGENCIAS = [
+    "DIVERGÊNCIA DE RELACIONAMENTO",
+    "DIVERGÊNCIA DE ITEM FORA DO MIX DA LOJA",
+    "DIVERGÊNCIA DE ITEM SEM PEDIDO",
+    "DIVERGÊNCIA DE CUSTO",
+    "DIVERGÊNCIA DE QUANTIDADE ACIMA DO PEDIDO",
+    "DIVERGÊNCIA DE CONDIÇÃO PAGAMENTO DA NOTA X COND. NEGOCIADA NO PEDIDO",
+    "DIVERGÊNCIA DE PRAZO DE PAGAMENTO X DATA DE EMISSÃO DA NOTA",
+    "DIVERGÊNCIA ABAIXO DA CONDIÇÃO PAGAMENTO AUTORIZADO PELA CONTROLADORIA",
+    "DIVERGÊNCIA DE NOTA COM PEDIDO BLOQUEADO",
+    "DIVERGÊNCIA DE NOTA COM PEDIDO SEM SALDO",
+    "DIVERGÊNCIA DE NOTA COM PEDIDO EXPIRADO",
+    "DIVERGÊNCIA DE NOTA 100% SEM PEDIDO",
+    "DIVERGÊNCIA DE ITEM BONIFICADO SEM PEDIDO",
+    "DIVERGÊNCIA DE NOTA DE BONIFICAÇÃO 100% SEM PEDIDO"
+]
 
-.texto-envio {
-    font-weight: bold;
-    font-size: 16px;
-}
 
-.botao-expedicao button{
-    background-color: #2E86C1;
-    color: white;
-}
+def calcular_vencimento(dias):
+    return datetime.now().date() + timedelta(days=int(dias))
 
-.botao-compras button{
-    background-color: #27AE60;
-    color: white;
-}
 
-.botao-cadastro button{
-    background-color: #8E44AD;
-    color: white;
-}
+def formatar_data(data_obj):
+    if not data_obj:
+        return "-"
+    if isinstance(data_obj, str):
+        try:
+            data_obj = datetime.fromisoformat(data_obj).date()
+        except:
+            return data_obj
+    return data_obj.strftime("%d/%m/%y")
 
-.botao-prevencao button{
-    background-color: #D35400;
-    color: white;
-}
 
-.botao-uso button{
-    background-color: #16A085;
-    color: white;
-}
+def tela_tarefa(usuario="prevenção", loja="Loja 01"):
 
-.botao-finalizar button{
-    background-color: #C0392B;
-    color: white;
-}
+    st.title("AUTORIZAR RECEBIMENTO DE MERCADORIAS")
 
-</style>
-""", unsafe_allow_html=True)
+    cores_setor = {
+        "expedição": "#1f77b4",
+        "compras": "#ff7f0e",
+        "cadastro": "#2ca02c",
+        "prevenção": "#d62728",
+        "uso e consumo": "#9467bd",
+        "admin": "#0d6efd"
+    }
 
-st.markdown('<div class="barra-envio"><div class="barra-conteudo">', unsafe_allow_html=True)
+    cor_barra = cores_setor.get(usuario.lower(), "#111111")
 
-st.markdown('<div class="texto-envio">ENVIAR TAREFA PARA :</div>', unsafe_allow_html=True)
+    st.markdown(f"""
+    <style>
 
-col1,col2,col3,col4,col5,col6 = st.columns(6)
+    .block-container {{
+        padding-bottom:140px;
+    }}
 
-with col1:
-    st.markdown('<div class="botao-expedicao">', unsafe_allow_html=True)
-    if st.button("Expedição"):
-        enviar_para("Expedição")
-    st.markdown('</div>', unsafe_allow_html=True)
+    .barra-envio {{
+        position:fixed;
+        bottom:0;
+        left:0;
+        right:0;
+        background:{cor_barra};
+        padding:18px;
+        z-index:9999;
+        box-shadow:0 -4px 15px rgba(0,0,0,0.4);
+    }}
 
-with col2:
-    st.markdown('<div class="botao-compras">', unsafe_allow_html=True)
-    if st.button("Compras"):
-        enviar_para("Compras")
-    st.markdown('</div>', unsafe_allow_html=True)
+    .barra-botoes {{
+        display:flex;
+        gap:10px;
+        margin-top:10px;
+    }}
 
-with col3:
-    st.markdown('<div class="botao-cadastro">', unsafe_allow_html=True)
-    if st.button("Cadastro"):
-        enviar_para("Cadastro")
-    st.markdown('</div>', unsafe_allow_html=True)
+    .barra-botoes button {{
+        flex:1;
+        padding:10px;
+        border-radius:8px;
+        border:none;
+        background:#111;
+        color:white;
+        font-weight:bold;
+        cursor:pointer;
+    }}
 
-with col4:
-    st.markdown('<div class="botao-prevencao">', unsafe_allow_html=True)
-    if st.button("Prevenção"):
-        enviar_para("Prevenção")
-    st.markdown('</div>', unsafe_allow_html=True)
+    .barra-botoes button:hover {{
+        background:#333;
+    }}
 
-with col5:
-    st.markdown('<div class="botao-uso">', unsafe_allow_html=True)
-    if st.button("Uso e Consumo"):
-        enviar_para("Uso e Consumo")
-    st.markdown('</div>', unsafe_allow_html=True)
+    </style>
+    """, unsafe_allow_html=True)
 
-with col6:
-    st.markdown('<div class="botao-finalizar">', unsafe_allow_html=True)
-    if st.button("Finalizar Tarefa"):
-        finalizar_tarefa()
-    st.markdown('</div>', unsafe_allow_html=True)
+    fornecedores_db = load("fornecedores") or {}
 
-st.markdown('</div></div>', unsafe_allow_html=True)
+    st.markdown(f"**Usuário:** {usuario}")
+    st.markdown(f"**Loja:** {loja}")
+
+    st.markdown("---")
+
+    # FORNECEDOR
+    fornecedores_nomes = list(fornecedores_db.keys())
+
+    selecionados = st.multiselect(
+        "Fornecedor",
+        fornecedores_nomes + ["Outros"]
+    )
+
+    if "Outros" in selecionados:
+        st.text_input("Nome fornecedor (Outros)")
+
+    # NOTAS
+    notas_input = st.text_input("Notas (separadas por barra '/')")
+
+    if notas_input:
+        lista_notas = [n.strip() for n in notas_input.split("/") if n.strip()]
+
+    # ANEXAR NOTAS
+    st.file_uploader(
+        "Anexar Notas para Autorizar Recebimento",
+        type=["pdf","xml","jpg","png"],
+        accept_multiple_files=True
+    )
+
+    # FORNECEDORES SELECIONADOS
+    for nome in selecionados:
+
+        st.markdown("---")
+
+        if nome == "Outros":
+            st.subheader("Fornecedor (Outros)")
+            continue
+
+        dados = fornecedores_db.get(nome, {})
+        razao_social = dados.get("razao_social") or nome
+        prazo = dados.get("condicao_pagamento", 0)
+
+        venc_normal = calcular_vencimento(prazo)
+
+        st.subheader(razao_social)
+        st.write(f"Prazo: {prazo} dias")
+        st.write(f"Vencimento: {formatar_data(venc_normal)}")
+
+    # CATEGORIAS
+    st.markdown("---")
+    st.subheader("Categorias")
+    st.multiselect("Selecione categorias", CATEGORIAS)
+
+    # PENDÊNCIAS
+    st.subheader("Pendências")
+    st.multiselect("Selecione pendências", PENDENCIAS)
+
+    # =========================
+    # MENSAGENS
+    # =========================
+
+    st.markdown("---")
+    st.subheader("Mensagens")
+
+    if "mensagens" not in st.session_state:
+        st.session_state.mensagens = []
+
+    if "campo_mensagem" not in st.session_state:
+        st.session_state.campo_mensagem = ""
+
+    def adicionar_mensagem():
+
+        texto = st.session_state.campo_mensagem.strip()
+
+        if texto:
+            st.session_state.mensagens.append({
+                "usuario": usuario,
+                "data": datetime.now().strftime("%d/%m/%Y %H:%M"),
+                "texto": texto
+            })
+
+            st.session_state.campo_mensagem = ""
+
+    st.text_area(
+        "Escrever mensagem",
+        key="campo_mensagem"
+    )
+
+    st.button(
+        "Adicionar Mensagem",
+        on_click=adicionar_mensagem
+    )
+
+    for msg in st.session_state.mensagens:
+        st.write(f"[{msg['data']}] {msg['usuario']}: {msg['texto']}")
+
+    # DIVERGÊNCIAS
+    st.markdown("---")
+    st.subheader("Divergências")
+
+    for div in DIVERGENCIAS:
+        if st.checkbox(div):
+            st.text_input(f"Informar NF - {div}")
+            st.file_uploader(f"Anexar - {div}")
+
+    # ANEXAR DEVOLUÇÃO
+    st.markdown("---")
+
+    st.file_uploader(
+        "Anexar Devolução",
+        type=["pdf","xml","jpg","png"],
+        accept_multiple_files=True
+    )
+
+    # BARRA FIXA
+    st.markdown(f"""
+    <div class="barra-envio">
+
+    <div style="color:white;font-weight:bold;">
+    ENVIAR TAREFA PARA :
+    </div>
+
+    <div class="barra-botoes">
+
+    <button>Expedição</button>
+    <button>Compras</button>
+    <button>Cadastro</button>
+    <button>Prevenção</button>
+    <button>Uso e Consumo</button>
+
+    </div>
+
+    </div>
+    """, unsafe_allow_html=True)
