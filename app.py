@@ -4,10 +4,12 @@ from cadastros.fornecedores import tela_fornecedores
 from admin.painel import painel_admin
 from security.authorization import modulos_permitidos
 from telas.tarefa_recebimento import tela_tarefa
-st.write("APP INICIADO")
 
 # 🔥 LAYOUT CORRETO
 st.set_page_config(page_title="Portal Expedição", layout="wide")
+
+# DEBUG
+st.write("APP INICIADO")
 
 # ---------- SESSION INIT ----------
 if "authenticated" not in st.session_state:
@@ -83,4 +85,5 @@ else:
     elif menu_key == "configuracoes":
         st.title("⚙️ Configurações do Sistema")
         st.info("Configurações gerais da plataforma")
+
 
